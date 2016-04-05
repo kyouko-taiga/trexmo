@@ -1,0 +1,41 @@
+<form id="{{fd.name}}" class="">
+  {% for field in fd.fields.values() %}
+  <div class="col-sm-6 form-group"{% if field.preconditions %} style="display:none"{% endif %}>
+    <label for="{{fd.name}}_{{field.name}}" class="control-label">
+      {{field.label}}{% if field.required %}*{% endif %}
+    </label>
+    <div>
+      {% if field.options %}
+      <select id="{{fd.name}}_{{field.name}}" name="{{field.name}}"
+        class="form-control{% if field.allows_custom %} allows-custom{% endif %}"
+        data-type="{{field.data_type.__name__}}">
+        {% for option in field.options %}
+        <option
+          {% if option.value == values[field.name] %}selected="selected"{% endif %}
+          value="{{option.value}}">
+          {% if option.value in values[field.name].selection %}
+          (recommended)
+          {% elif option.value in values[field.name].exp_selection %}
+          (experimental)
+          {% endif %}
+          {{option.label}}
+        </option>
+        {% endfor %}
+      </select>
+      {% if field.allows_custom %}
+      <div class="text-center"><em>or</em></div>
+      <input name="{{field.name}}_alt"
+        class="form-control" data-type="{{field.data_type.__name__}}"
+        placeholder="type a {{field.data_type.__name__}} value here"
+        value="{{values.get(field.name)}}">
+      {% endif %}
+      {% else %}
+      <input id="{{fd.name}}_{{field.name}}" name="{{field.name}}"
+        class="form-control" data-type="{{field.data_type.__name__}}"
+        placeholder="type a {{field.data_type.__name__}} value here"
+        value="{{values.get(field.name)}}">
+      {% endif %}
+    </div>
+  </div>  
+  {% endfor %}
+</form>

@@ -1,0 +1,10 @@
+Flask==0.10.1
+funcparserlib==0.3.6
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+PyYAML==3.11
+six==1.9.0
+SQLAlchemy==1.0.12
+Werkzeug==0.11.5
+-e git://github.com/kyouko-taiga/yaffel-py.git@e663c2dd61a147a238c9d8c6524eb228dda79994#egg=yaffel
