@@ -11,7 +11,7 @@ class FormDescription(object):
         self.parse(filename)
 
     def parse(self, filename):
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             raw_data = ordered_load(f)
 
         # required information
