@@ -79,6 +79,7 @@
 {% endblock content %}
 
 {% block script %}
+<script type="text/javascript" src="{{ url_for('static', filename='jspdf/jspdf.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/yaffel.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/form_view.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/scenario.js') }}"></script>

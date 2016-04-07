@@ -126,16 +126,16 @@
         trexmo.api.get('run/' + scenario.id, {
             success: function(data) {
                 // display response information
-                var report = $('#report').html('<h4>Scenario exection report</h4>')
+                var report = $('#report').html('<h4>Exposure situation report</h4>')
 
                 report.append(
                     $('<div class="panel panel-info">').append(
                         $('<div class="panel-heading">General information</div>'),
                         $('<div class="panel-body">').append(
-                            $('<dl class="dl-horizontal">').append(
-                                $('<dt>Scenario</dt>'),
+                            $('<dl>').append(
+                                $('<dt>Name of the exposure situation</dt>'),
                                 $('<dd>').html(data.scenario),
-                                $('<dt>Model</dt>'),
+                                $('<dt>Model of exposure modelling</dt>'),
                                 $('<dd>').html(data.model)
                             )
                         )
@@ -168,6 +168,21 @@
                     $('<div class="panel panel-info">').append(
                         $('<div class="panel-heading">Results</div>'),
                         $('<div class="panel-body">').append(data.result)
+                    )
+                )
+
+                report.parent().append(
+                    $('<div>').append(
+                        $('<button class="btn btn-default">')
+                            .text('Save as PDF')
+                            .click(function(e) {
+                                e.preventDefault()
+
+                                var pdf = new jsPDF('p', 'pt', 'a4')
+                                pdf.fromHTML(report.get(0), 15, 15, {
+                                })
+                                pdf.save('report.pdf')
+                            })
                     )
                 )
 

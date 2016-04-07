@@ -1,4 +1,9 @@
-import itertools, pickle, os, re
+import datetime
+import itertools
+import pickle
+import os
+import re
+
 import yaffel.parser
 
 from collections.abc import Iterable
@@ -135,7 +140,8 @@ def update_scenario(sid):
 
     # Save the updated scenario
     spath = os.path.join(settings.DATA_DIR, 'scenarii', scenario.id)
-    with open(spath, 'wb') as f: pickle.dump(scenario,f)
+    with open(spath, 'wb') as f:
+        pickle.dump(scenario,f)
 
     return make_response('', 204)
 
@@ -168,7 +174,8 @@ def create_scenario():
 
     # Save the new scenario to a file named after its ID
     filename = os.path.join(settings.DATA_DIR, 'scenarii', scenario.id)
-    with open(filename, 'wb') as f: pickle.dump(scenario, f)
+    with open(filename, 'wb') as f:
+        pickle.dump(scenario, f)
 
     return jsonify({'id': scenario.id}), 201
 
