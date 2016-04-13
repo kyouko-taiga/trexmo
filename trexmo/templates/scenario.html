@@ -58,6 +58,13 @@
             <div class="tab-pane fade in active" id="determinants">
               {% if form %}
               <h4>Determinants for {{ models[scenario.model].label }}</h4>
+              <p class="text-muted">
+                Please select the determinants by rows rather than columns,
+                and be sure enter a value for each and every field by scrolling down the list.
+                <br />
+                If you perform a model translation, it may be possible for a field to contain multiple recomanded values.
+                Be sure to select the most appropriate one for each and every field.
+              </p>
               {{ form | safe }}
               {% else %}
               <div class="alert alert-danger">
