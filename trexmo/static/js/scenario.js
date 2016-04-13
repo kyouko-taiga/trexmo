@@ -180,6 +180,7 @@
 
                                 var pdf = new jsPDF('p', 'pt', 'a4')
                                 pdf.fromHTML(report.get(0), 15, 15, {
+                                    width: 540
                                 })
                                 pdf.save('report.pdf')
                             })
