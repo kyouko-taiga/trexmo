@@ -346,7 +346,8 @@ def translate_scenario(sid, mid):
     model_description = ModelDescription.get(scenario.model)
     form_description = FormDescription.get(model_description.form)
 
-    return render_template('form.html', fd=form_description, values=scenario.data[mid])
+    return render_template(
+        'form.html', fd=form_description, values=scenario.data[mid], is_translated=True)
 
 
 @engine.route('/form/<fid>')

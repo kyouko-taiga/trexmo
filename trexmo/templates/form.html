@@ -1,6 +1,19 @@
 <form id="{{fd.name}}" class="">
   {% for field in fd.fields.values() %}
-  <div class="col-sm-6 form-group"{% if field.preconditions %} style="display:none"{% endif %}>
+  <div
+    class="col-sm-6 form-group
+    {% if is_translated %}
+    {% if not (values[field.name].selection or values[field.name].exp_selection) %}
+    has-error
+    {% elif (values[field.name].selection|length + values[field.name].exp_selection|length) > 1 %}
+    has-warning
+    {% else %}
+    {{values[field.name].selection}} {{values[field.name].exp_selection}}
+    has-success
+    {% endif %}
+    {% endif %}"
+    {% if field.preconditions %}style="display:none"{% endif %}
+  >
     <label for="{{fd.name}}_{{field.name}}" class="control-label">
       {{field.label}}{% if field.required %}*{% endif %}
     </label>
