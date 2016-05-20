@@ -47,6 +47,10 @@ class Transformation(object):
     def __init__(self, name, raw_data):
         self.fields = {}
         for field in raw_data:
+            # Ignore empty translations.
+            if raw_data[field] is None:
+                continue
+
             self.fields[field] = []
 
             for line in raw_data[field].get('default', []):

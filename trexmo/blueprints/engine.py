@@ -273,9 +273,14 @@ def translate_scenario(sid, mid):
     if translation is None:
         raise ApiError("No available translation from '%s' to '%s'." % (scenario.model, mid), 404)
 
-    # Create a storage for the new model determinants, unless it already exists
+    model_description = ModelDescription.get(mid)
+    form_description = FormDescription.get(model_description.form)
+
+    # Create a storage for the new model determinants, unless it already exists.
     if not mid in scenario.data:
-        scenario.data[mid] = {}
+        scenario.data[mid] = {
+            field.name: Determinant(field.default) for field in form_description.fields.values()
+        }
 
     determinants = scenario.data[scenario.model]
 
@@ -341,10 +346,6 @@ def translate_scenario(sid, mid):
 
     # Update the scenario model
     scenario.model = mid
-
-    # Return the new form
-    model_description = ModelDescription.get(scenario.model)
-    form_description = FormDescription.get(model_description.form)
 
     return render_template(
         'form.html', fd=form_description, values=scenario.data[mid], is_translated=True)
