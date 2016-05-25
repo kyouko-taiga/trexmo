@@ -22,7 +22,7 @@
               <dt>Date of creation</dt>
               <dd>{{ scenario.created_at.date().strftime('%d/%m/%y') }}</dd>
               <dt>Model</dt>
-              <dd>{{ scenario.model or 'Undefined' }}</dd>
+              <dd>{{ models[scenario.model].label }}</dd>
               <dt>Substance</dt>
               <dd>{{ scenario.substance }} ({{ scenario.cas }})</dd>
             </dl>
@@ -75,7 +75,7 @@
                 <label for="input-model" class="col-sm-2 control-label">Model</label>
                 <div class="col-sm-10">
                   <select class="form-control" name="model" id="input-model">
-                    {% for model in models %}
+                    {% for model in models.values() %}
                     <option value="{{ model.name }}">{{ model.label }}</option>
                     {% endfor %}
                   </select>

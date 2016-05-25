@@ -64,7 +64,7 @@ def dashboard():
 
     template_data = {
         'scenarii': scenarii,
-        'models': ModelDescription.all().values()
+        'models': ModelDescription.all()
     }
     return render_template('dashboard.html', **template_data)
 
