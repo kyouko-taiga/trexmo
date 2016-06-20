@@ -2,7 +2,14 @@ import os
 
 from flask import Flask
 
+from sqlalchemy import create_engine
+
+from .core.db import db_session
 from .core.utils.app import register_blueprints
+
+
+def remove_db_session(exception=None):
+    db_session.remove()
 
 
 def create_app(package_name, package_path, debug=False):
@@ -18,6 +25,9 @@ def create_app(package_name, package_path, debug=False):
 
     if debug:
         app.debug = debug
+
+    app.db_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    app.teardown_appcontext(remove_db_session)
 
     register_blueprints(app, package_name, package_path)
     return app
