@@ -11,12 +11,12 @@ from flask import Blueprint
 from flask import abort, jsonify, make_response, request, render_template
 
 from trexmo import settings
-from trexmo.db.models import FormDescription, ModelDescription, TranslationDescription
-from trexmo.db.models import Determinant, Scenario
-from trexmo.exceptions import ApiError
+from trexmo.core.db.models import FormDescription, ModelDescription, TranslationDescription
+from trexmo.core.db.models import Determinant, Scenario
+from trexmo.core.exc import ApiError
 
 
-engine = Blueprint('engine', __name__, template_folder='templates')
+bp = Blueprint('engine', __name__)
 
 
 def load_scenario(scenario):
@@ -42,7 +42,7 @@ def eval_or_raise(expr):
         raise ApiError(str(e), status_code=500, data={'yaffel': expr})
 
 
-@engine.errorhandler(ApiError)
+@bp.errorhandler(ApiError)
 def handle_api_error(error):
     return jsonify({
         'message': error.message,
@@ -51,7 +51,7 @@ def handle_api_error(error):
     }), error.code
 
 
-@engine.route('/')
+@bp.route('/')
 def dashboard():
     # Load scenario previews
     scenarii = []
@@ -69,7 +69,7 @@ def dashboard():
     return render_template('dashboard.html', **template_data)
 
 
-@engine.route('/scenario/<sid>', methods=['GET'])
+@bp.route('/scenario/<sid>', methods=['GET'])
 def show_scenario(sid):
     # Load the scenario
     scenario = load_scenario(sid)
@@ -90,7 +90,7 @@ def show_scenario(sid):
     return render_template('scenario.html', **template_data)
 
 
-@engine.route('/scenario/<sid>', methods=['POST'])
+@bp.route('/scenario/<sid>', methods=['POST'])
 def update_scenario(sid):
     # Load the scenario
     scenario = load_scenario(sid)
@@ -146,7 +146,7 @@ def update_scenario(sid):
     return make_response('', 204)
 
 
-@engine.route('/scenario/', methods=['POST'])
+@bp.route('/scenario/', methods=['POST'])
 def create_scenario():
     # Validate the scenario metadata (name, substance and model must be set)
     fields = {}
@@ -180,7 +180,7 @@ def create_scenario():
     return jsonify({'id': scenario.id}), 201
 
 
-@engine.route('/scenario/<sid>', methods=['DELETE'])
+@bp.route('/scenario/<sid>', methods=['DELETE'])
 def delete_scenario(sid):
     path = os.path.join(settings.DATA_DIR, 'scenarii', sid)
     if not os.path.isfile(path):
@@ -190,7 +190,7 @@ def delete_scenario(sid):
     return make_response('', 204)
 
 
-@engine.route('/run/<sid>')
+@bp.route('/run/<sid>')
 def run_scenario(sid):
     # Load the scenario
     scenario = load_scenario(sid)
@@ -263,7 +263,7 @@ def run_scenario(sid):
     })
 
 
-@engine.route('/translate/<sid>/<mid>')
+@bp.route('/translate/<sid>/<mid>')
 def translate_scenario(sid, mid):
     # Load the scenario
     scenario = load_scenario(sid)
@@ -351,7 +351,7 @@ def translate_scenario(sid, mid):
         'form.html', fd=form_description, values=scenario.data[mid], is_translated=True)
 
 
-@engine.route('/form/<fid>')
+@bp.route('/form/<fid>')
 def show_form(fid):
     # Load the available forms
     with open(os.path.join(settings.CACHE_DIR, 'forms'), 'rb') as f:
@@ -362,7 +362,7 @@ def show_form(fid):
     abort(404)
 
 
-@engine.route('/yaffel/eval', methods=['POST'])
+@bp.route('/yaffel/eval', methods=['POST'])
 def yaffel_eval():
     datatype, value = eval_or_raise(request.data.decode('utf-8'))
     return jsonify({'datatype': datatype.__name__, 'value': value})

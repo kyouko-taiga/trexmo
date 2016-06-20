@@ -1,6 +1,6 @@
 import argparse
 
-from trexmo import app
+from trexmo.app import create_app
 
 
 class Command():
@@ -26,4 +26,5 @@ class Command():
 
         args = parser.parse_args(self.argv[1:])
         if args.subcommand == 'run':
-            app.run(debug=args.debug)
+            app = create_app(debug=args.debug)
+            app.run()

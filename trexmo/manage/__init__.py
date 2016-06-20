@@ -53,14 +53,14 @@ class Manage(object):
         return '\n'.join(usage)
 
     def __call__(self):
-        # check if there are enough arguments
+        # Check if there are enough arguments
         if len(self.argv) < 2:
             print(self.main_help_text())
             return 0
 
         subcommand = self.argv[1]
 
-        # handle optional arguments --version and --help
+        # Handle optional arguments --version and --help
         if subcommand.startswith('-'):
             if subcommand in ['-v', '--version']:
                 print('%s version %s' % (self.prog_name, self.version))
@@ -71,7 +71,7 @@ class Manage(object):
                 return -1
             return 0
 
-        # execute the subcommand
+        # Execute the subcommand
         try:
             getattr(self, self.argv[1])()
         except AttributeError as e:

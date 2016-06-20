@@ -2,7 +2,7 @@ import os
 
 from collections import OrderedDict
 from trexmo import settings
-from trexmo.utils import ordered_load
+from trexmo.core.utils.loaders import ordered_loader
 
 class ModelDescription(object):
 
@@ -11,7 +11,7 @@ class ModelDescription(object):
 
     def parse(self, filename):
         with open(filename, 'r', encoding='utf-8') as f:
-            raw_data = ordered_load(f)
+            raw_data = ordered_loader(f)
 
         # required information
         if 'name' not in raw_data:
