@@ -22,7 +22,6 @@
         "object-assign": "latest",
         "react": "latest",
         "react-dom": "latest",
-        "superstate": "latest",
         "whatwg-fetch": "latest"
     },
     "babel": {

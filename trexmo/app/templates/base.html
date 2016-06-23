@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="EI=edge">
+  <meta name="viewport" constent="width=device-width, initial-scale=1">
+  <title>TREXMO</title>
+
+  <!-- bootstrap stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+
+  <!-- creative loading effects stylesheets -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/normalize.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/ns-default.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/ns-style-growl.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/component.css') }}" />
+
+  <!-- trexmo core stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/trexmo.css') }}" />
+</head>
+<body style="padding-top: 50px;">
+  <div id="trxm-content">{% block content %}{% endblock %}</div>
+
+  <!-- global scripts -->
+  <script src="{{ url_for('static', filename='bootstrap/js/jquery-2.1.0.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='codrops/js/modernizr.custom.js') }}"></script>
+	<script src="{{ url_for('static', filename='codrops/js/classie.js') }}"></script>
+	<script src="{{ url_for('static', filename='codrops/js/notificationFx.js') }}"></script>
+
+  <!-- trexmo core scripts -->
+  {% if config['DEBUG'] %}
+  <script type="text/javascript" src="{{ url_for('static', filename='build/trexmo.js') }}"></script>
+  {% else %}
+  <script type="text/javascript" src="{{ url_for('static', filename='build/trexmo.min.js') }}"></script>
+  {% endif %}
+
+  <!-- page specific scripts -->
+  {% block script %}{% endblock script %}
+</body>
+</html>

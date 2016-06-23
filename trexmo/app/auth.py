@@ -7,6 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from trexmo.core.db.models import User
 from trexmo.core.utils.auth import make_auth_token
+from trexmo.core.utils.time import utcnow
 
 
 bp = Blueprint('auth', __name__)
@@ -60,5 +61,5 @@ def create_token():
 
     return jsonify({
         'token': token,
-        'expires_at': current_app.config['AUTH_TOKEN_DURATION']
+        'expires_at': utcnow().timestamp() + current_app.config['AUTH_TOKEN_DURATION']
     }), 201
