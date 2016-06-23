@@ -7,6 +7,7 @@ basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data', 'trexmo.db')
 
 # Authentication
+SECRET_KEY = '108-e08-c20'
 AUTH_TOKEN_DURATION = 86400
 
 DATA_DIR          = os.path.join(basedir, 'data')
