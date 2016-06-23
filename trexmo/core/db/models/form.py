@@ -1,154 +1,172 @@
 import os
+
 import yaffel.parser
 
 from collections import Mapping, OrderedDict
-from trexmo import settings
+
+from flask import current_app
+
 from trexmo.core.utils.loaders import ordered_loader
 
-class FormDescription(object):
+from ..dictionarization import Dictionarizable
 
-    def __init__(self, filename):
-        self.parse(filename)
 
-    def parse(self, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            raw_data = ordered_loader(f)
+class Form(Dictionarizable):
 
-        # required information
-        if 'name' not in raw_data:
-            raise SyntaxError('form description files must contain a name')
-        self.name = raw_data['name']
+    _dictionarizable_attrs = ('name', 'label', 'version', 'fields')
 
-        # optional general information
-        self.label = raw_data.get('label', self.name)
-        self.version = raw_data.get('version', None)
-
-        # form fields
-        self.fields = OrderedDict()
-        for f,g in raw_data.get('fields', {}).items():
-            self.fields[f] = FieldDescription(f,g)
+    def __init__(self, name=None, label=None, version=None, fields=None):
+        self.name = name
+        self.label = label or name
+        self.version = version
+        self.fields = fields
 
     def __getitem__(self, name):
         return self.fields[name]
 
-    def __str__(self):
-        rets = 'Form of %s (%s)\n' % (self.name, self.label)
-        for field_name, field in self.fields.items():
-            rets += '  - ' + str(field)
-        return rets
-
-    def as_dict(self):
-        return {
-            'name': self.name,
-            'label': self.label,
-            'version': self.version,
-            'fields': OrderedDict([(f, g.as_dict()) for f,g in self.fields.items()])
-        }
+    def __repr__(self):
+        return '<Form %r>' % self.label
 
     @classmethod
-    def all(cls, directory=None):
-        forms = {}
-        for filename in os.listdir(directory or settings.FORMS_ROOT_DIR):
-            form = cls(os.path.join(directory or settings.FORMS_ROOT_DIR, filename))
-            forms[form.name] = form
-        return forms
+    def load(cls, file):
+        data = ordered_loader(file)
+        rv = cls()
+
+        # Parse the required data.
+        if 'name' not in data:
+            raise SyntaxError('Form description files must contain a name.')
+        rv.name = data['name']
+
+        # Parse the form fields.
+        rv.fields = OrderedDict()
+        for field_name, field_data in data.get('fields', {}).items():
+            rv.fields[field_name] = Field.parse(field_name, field_data)
+
+        # Parse the optional data.
+        rv.label = data.get('label', rv.name)
+        rv.version = data.get('version', None)
+
+        return rv
 
     @classmethod
-    def get(cls, name, default=None, directory=None):
-        for filename in os.listdir(directory or settings.FORMS_ROOT_DIR):
-            form = cls(os.path.join(directory or settings.FORMS_ROOT_DIR, filename))
+    def all(cls, directory):
+        rv = []
+        for filename in os.listdir(directory):
+            if not filename.startswith('.'):
+                with open(os.path.join(directory, filename), 'r') as f:
+                    rv.append(cls.load(f))
+        return rv
+
+    @classmethod
+    def get(cls, directory, name):
+        for form in cls.all(directory):
             if form.name == name:
                 return form
-        return default
+        raise KeyError(name)
 
-class FieldDescription(object):
 
-    def __init__(self, name, data):
-        # required information
+class Field(Dictionarizable):
+
+    _dictionarizable_attrs = (
+        'name', 'label', 'data_type', 'required', 'allows_custom', 'default',
+        'constraints', 'preconditions'
+    )
+
+    def __init__(
+            self, name=None, label=None, data_type=None, required=False,
+            allows_custom=False, default=None, constraints=None,
+            preconditions=None):
+
+        self.name = name
+        self.label = label or name
+        self.data_type = data_type
+        self.required = required
+        self.allows_custom = allows_custom
+        self.default = default
+        self.constraints = constraints or []
+        self.preconditions = preconditions or []
+
+    def __repr__(self):
+        return '<Field %r>' % self.label
+
+    @classmethod
+    def parse(cls, name, data):
+        rv = cls()
+
+        # Parse the required data.
         if 'data_type' not in data:
             raise SyntaxError('field "%s" must have a data type' % name)
-        if   data['data_type'] == 'int':   self.data_type = int
-        elif data['data_type'] == 'float': self.data_type = float
-        elif data['data_type'] == 'str':   self.data_type = str
 
-        # optional general information
-        self.name = name
-        self.label = data.get('label', self.name)
-        self.required = data.get('required', False)
-        self.allows_custom = data.get('allows_custom', False)
-        self._raw_default = data.get('default', self.data_type())
-
-        # field options
-        self.options = [FieldOption(opt) for opt in data['options']] if 'options' in data else None
-
-        # field constraints and preconditions
-        self.constraints = data.get('constraints', [])
-        self.preconditions = data.get('preconditions', [])
-
-    @property
-    def default(self):
-        # Raw values could be a yaffel expression, so we try to parse them.
-        # If the parsing fail, we return the raw value "as is".
-        try:
-            return yaffel.parser.parse(self._raw_default)[1]
-        except:
-            return self._raw_default
-
-    def as_dict(self):
-        data = {
-            'name': self.name,
-            'label': self.label,
-            'required': self.required,
-            'default': self.default,
-            'constraints': self.constraints,
-            'preconditions': self.preconditions
-        }
-
-        if self.options:
-            data['options'] = [opt.as_dict() for opt in self.options]
-        return data
-            
-
-    def __str__(self):
-        return '<Field %s:%r>' % (self.data_type.__name__, self.label)
-
-class FieldOption(object):
-
-    def __init__(self, data):
-        if isinstance(data, Mapping):
-            # required information
-            if 'value' not in data:
-                raise SyntaxError('options must have a value' % name)
-            self._raw_value = data['value']
-
-            # optional general information
-            self.label = data.get('label', self.value)
-
-            # option constraints and preconditions
-            self.constraints = data.get('constraints', [])
-            self.preconditions = data.get('preconditions', [])
+        if data['data_type'] == 'int':
+            rv.data_type = int
+        elif data['data_type'] == 'float':
+            rv.data_type = float
+        elif data['data_type'] == 'str':
+            rv.data_type = str
         else:
-            self.value = data
-            self.label = self.value
-            self.constraints = []
-            self.preconditions = []
+            raise SyntaxError('Unknown data type: "%s".' % data['data_type'])
 
-    @property
-    def value(self):
-        # Raw values could be a yaffel expression, so we try to parse them.
-        # If the parsing fail, we return the raw value "as is".
-        try:
-            return yaffel.parser.parse(self._raw_value)[1]
-        except:
-            return self._raw_value
+        # Parse the field options.
+        if 'options' in data:
+            rv.options = [FieldOption.parse(option) for option in data['options']]
 
-    def as_dict(self):
-        return {
-            'value': self.value,
-            'label': self.label,
-            'constraints': self.constraints,
-            'preconditions': self.preconditions
-        }
+        # Parse the field constraints and preconditions.
+        rv.constraints = data.get('constraints', [])
+        rv.preconditions = data.get('preconditions', [])
 
-    def __str__(self):
-        return '<Option %s (%r)>' % (self.label, self.value)
+        # Parse the optional data.
+        rv.name = name
+        rv.label = data.get('label', rv.name)
+        rv.required = data.get('required', False)
+        rv.allows_custom = data.get('allows_custom', False)
+
+        # The default value could be a yaffel expression, so we try to
+        # evaluate it first, and we return the value as is if we failed.
+        if ('default' in data) and (data['default'] is not None):
+            try:
+                rv.default = yaffel.parser.parse(data['default'])[1]
+            except:
+                rv.default = data['default']
+
+        return rv
+
+
+class FieldOption(Dictionarizable):
+
+    _dictionarizable_attrs = ('value', 'label', 'constraints', 'preconditions')
+
+    def __init__(self, value=None, label=None, constraints=None, preconditions=None):
+        self.value = value
+        self.label = label or value
+        self.constraints = constraints or []
+        self.preconditions = preconditions or []
+
+    def __repr__(self):
+        return '<Option %r>' % self.label
+
+    @classmethod
+    def parse(cls, data):
+        rv = cls()
+
+        if isinstance(data, Mapping):
+            # The option value could be a yaffel expression, so we try to
+            # evaluate it first, and we return the value as is if we failed.
+            if 'value' not in data:
+                raise SyntaxError('Otions must have a value.')
+            try:
+                rv.value = yaffel.parser.parse(data['value'])[1]
+            except:
+                rv.default = data['value']
+
+            # Parse the option constraints and preconditions.
+            rv.constraints = data.get('constraints', [])
+            rv.preconditions = data.get('preconditions', [])
+
+            # Parse the optional data.
+            rv.label = data.get('label', rv.value)
+
+        else:
+            rv.value = data
+            rv.label = rv.value
+
+        return rv

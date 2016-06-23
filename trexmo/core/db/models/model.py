@@ -1,72 +1,98 @@
 import os
 
 from collections import OrderedDict
-from trexmo import settings
+
+from flask import current_app
+
 from trexmo.core.utils.loaders import ordered_loader
 
-class ModelDescription(object):
+from . import Form
 
-    def __init__(self, filename):
-        self.parse(filename)
+from ..dictionarization import Dictionarizable
 
-    def parse(self, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            raw_data = ordered_loader(f)
 
-        # required information
-        if 'name' not in raw_data:
-            raise SyntaxError('model description files must contain a name')
-        self.name = raw_data['name']
-        if 'form' not in raw_data:
-            raise SyntaxError('model description files must contain a reference to a form')
-        self.form = raw_data['form']
-        if 'function' not in raw_data:
-            raise SyntaxError('model description files must contain a function')
-        self.function = raw_data['function']
+class Model(Dictionarizable):
 
-        # optional general information
-        self.label = raw_data.get('label', self.name)
-        self.version = raw_data.get('version', None)
-        self.unit = raw_data.get('unit', '')
+    _dictionarizable_attrs = ('name', 'label', 'version', 'unit', 'form', 'scores')
 
-        # model 'scores' and evaluation function
-        self.scores = OrderedDict()
-        for s,t in raw_data.get('scores', {}).items():
-            self.scores[s] = ScoreDescription(s,t)
+    def __init__(self, name=None, label=None, version=None, unit=None, form=None, scores=None):
+        self.name = name
+        self.label = label or name
+        self.version = version
+        self.unit = unit
+        self.form = form
+        self.scores = scores
 
-    def __str__(self):
-        rets = 'Model of %s (%s)\n' % (self.name, self.label)
-        rets += '\tE = ' + self.function
-        return rets
+    def __repr__(self):
+        return '<Model %r>' % self.label
 
     @classmethod
-    def all(cls, directory=None):
-        models = {}
-        for filename in os.listdir(directory or settings.MODELS_ROOT_DIR):
-            model = cls(os.path.join(directory or settings.MODELS_ROOT_DIR, filename))
-            models[model.name] = model
-        return models
+    def load(cls, file):
+        data = ordered_loader(file)
+        rv = cls()
+
+        # Parse the required data.
+        if 'name' not in data:
+            raise SyntaxError('Model description files must contain a name.')
+        rv.name = data['name']
+
+        if 'form' not in data:
+            raise SyntaxError('Model description files must contain a reference to a form.')
+        form_root = current_app.config['FORMS_ROOT_DIR']
+        rv.form = Form.get(form_root, data['form'])
+
+        if 'function' not in data:
+            raise SyntaxError('Model description files must contain a function.')
+        rv.function = data['function']
+
+        # Parse the model scores.
+        rv.scores = OrderedDict()
+        for score_name, score_data in data.get('scores', {}).items():
+            rv.scores[score_name] = Score.parse(score_data)
+
+        # Parse the optional data.
+        rv.label = data.get('label', rv.name)
+        rv.version = data.get('version', None)
+        rv.unit = data.get('unit', '')
+
+        return rv
 
     @classmethod
-    def get(cls, name, default=None, directory=None):
-        for filename in os.listdir(directory or settings.MODELS_ROOT_DIR):
-            model = cls(os.path.join(directory or settings.MODELS_ROOT_DIR, filename))
+    def all(cls, directory):
+        rv = []
+        for filename in os.listdir(directory):
+            if not filename.startswith('.'):
+                with open(os.path.join(directory, filename), 'r') as f:
+                    rv.append(cls.load(f))
+        return rv
+
+    @classmethod
+    def get(cls, directory, name):
+        for model in cls.all(directory):
             if model.name == name:
                 return model
-        return default
+        raise KeyError(name)
 
-class ScoreDescription(object):
 
-    def __init__(self, name, raw_data):
-        # parse each line of the raw list as a pair of <expression, condition>
-        self.data = []
-        for line in raw_data:
+class Score(Dictionarizable):
+
+    _dictionarizable_attrs = ('data', )
+
+    def __init__(self, data):
+        self.data = data
+
+    @classmethod
+    def parse(cls, data):
+        # Parse each line of the raw list as a pair of (expression, condition).
+        lines = []
+        for line in data:
             try:
-                # split the line as an <expression, condition> tuple
+                # Split the line as an (expression, condition) pair.
                 t = line.split('if')
                 u = {'expr': t[0][t[0].index('as')+2:].strip(),
                      'cond': t[1].strip() if len(t) > 1 else None}
-                self.data.append(u)
+                lines.append(u)
             except AttributeError:
-                raise SyntaxError('Invalid syntax "%s"' % line)
-        # self.conversions = [r.match(line).groupdict() for line in raw_data]
+                raise SyntaxError('Invalid syntax "%s".' % line)
+
+        return cls(lines)

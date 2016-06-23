@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import abort, jsonify, make_response, request, render_template
 
-from trexmo.core.db.models import FormDescription
+from trexmo.core.db.models import Form
 
 
 bp = Blueprint('forms_api', __name__, template_folder='templates')
@@ -21,7 +21,7 @@ def accept_json():
 
 @bp.route('/<name>', methods=['GET'])
 def get_form(name):
-    form_description = FormDescription.get(name)
+    form_description = Form.get(name)
     if form_description is None:
         abort(404)
 

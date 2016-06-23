@@ -1,66 +1,95 @@
 import os
 
-from trexmo import settings
+from flask import current_app
+
 from trexmo.core.utils.loaders import ordered_loader
 
-class TranslationDescription(object):
+from ..dictionarization import Dictionarizable
 
-    def __init__(self, filename):
-        self.parse(filename)
 
-    def parse(self, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            raw_data = ordered_loader(f)
+class Translation(Dictionarizable):
 
-        # required information
-        if 'source' not in raw_data:
-            raise SyntaxError('translation description files must contain a source model')
-        self.source = raw_data['source']
-        if 'destination' not in raw_data:
-            raise SyntaxError('translation description files must contain a destination model')
-        self.destination = raw_data['destination']
+    _dictionarizable_attrs = ('source', 'destination', 'transformations')
 
-        # optional general information
-        self.version = raw_data.get('version', None)
+    def __init__(self, source=None, destination=None, transformations=None):
+        self.source = source
+        self.destination = destination
+        self.transformations = transformations or {}
 
-        # transformations
-        self.transformations = {s: Transformation(s,t)
-                                for s,t in raw_data.get('transformations', {}).items()}
-
-    def __str__(self):
-        return 'Translation from %s to %s' % (self.source, self.destination)
+    def __repr__(self):
+        return '<Translation %r -> %r>' % (self.source, self.destination)
 
     @classmethod
-    def all(cls, directory=None):
-        translations = {}
-        for filename in os.listdir(directory or settings.TRANS_ROOT_DIR):
-            trans = cls(os.path.join(directory or settings.TRANS_ROOT_DIR, filename))
-            translations[(trans.source, trans.destination)] = trans
-        return translations
+    def load(cls, file):
+        data = ordered_loader(file)
+        rv = cls()
+
+        # Parse the required data.
+        if 'source' not in data:
+            raise SyntaxError('Translation description files must contain a source model.')
+        rv.source = data['source']
+
+        if 'destination' not in data:
+            raise SyntaxError('Translation description files must contain a destination model.')
+        rv.destination = data['destination']
+
+        # Parse the transformations.
+        rv.transformations = {
+            src: Transformation.parse(trans)
+            for src, trans in data.get('transformations', {}).items()
+        }
+
+        # Parse the optional data.
+        rv.version = data.get('version', None)
+
+        return rv
 
     @classmethod
-    def get(cls, key, default=None, directory=None):
-        return cls.all(directory=directory).get(key, default)
+    def all(cls, directory):
+        rv = []
+        for filename in os.listdir(directory):
+            if not filename.startswith('.'):
+                with open(os.path.join(directory, filename), 'r') as f:
+                    rv.append(cls.load(f))
+        return rv
 
-class Transformation(object):
+    @classmethod
+    def get(cls, directory, source, destination):
+        for trans in cls.all(directory):
+            if (trans.source == source) and (trans.destination == destination):
+                return form
+        raise KeyError((source, destination))
 
-    def __init__(self, name, raw_data):
-        self.fields = {}
-        for field in raw_data:
-            # Ignore empty translations.
-            if raw_data[field] is None:
+
+class Transformation(Dictionarizable):
+
+    _dictionarizable_attrs = ('fields', )
+
+    def __init__(self, fields=None):
+        self.fields = fields or {}
+
+    @classmethod
+    def parse(cls, data):
+        rv = cls()
+
+        for field in data:
+            # Ignore empty transformations.
+            if data[field] is None:
                 continue
 
-            self.fields[field] = []
+            rv.fields[field] = []
 
-            for line in raw_data[field].get('default', []):
-                self.fields[field].append(self._parse_line(line, 'default'))
-            for line in raw_data[field].get('experimental', []):
-                self.fields[field].append(self._parse_line(line, 'experimental'))
+            for line in data[field].get('default', []):
+                rv.fields[field].append(cls._parse_line(line, 'default'))
+            for line in data[field].get('experimental', []):
+                rv.fields[field].append(cls._parse_line(line, 'experimental'))
 
-    def _parse_line(self, line, translation_type):
+        return rv
+
+    @classmethod
+    def _parse_line(cls, line, translation_type):
         try:
-            # split the line as an <expression, condition> tuple
+            # Split the line as an (expression, condition) pair.
             t = line.split('if')
             return {
                 'expr': t[0][t[0].index('as')+2:].strip(),
@@ -68,4 +97,4 @@ class Transformation(object):
                 'type': translation_type
              }
         except AttributeError:
-            raise SyntaxError('Invalid syntax "%s"' % line)
+            raise SyntaxError('Invalid syntax "%s".' % line)
