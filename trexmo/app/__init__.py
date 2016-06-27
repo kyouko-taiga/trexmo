@@ -1,6 +1,9 @@
+from flask import jsonify, render_template, request
+
 from werkzeug.contrib.cache import RedisCache
 
 from trexmo import factory
+from trexmo.core.exc import AuthenticationError
 from trexmo.core.utils.encoders import TrexmoJsonEncoder
 
 
@@ -27,6 +30,14 @@ def create_app(debug=False):
 
     # Register the custom Jinja filters
     app.template_filter(equal_or_in)
+
+    # Register the error handlers.
+    @app.errorhandler(AuthenticationError)
+    def handle_auth_error(error):
+        if not request.is_xhr:
+            return render_template('login.html'), 403
+        else:
+            return jsonify({'error': 'forbidden'}), 403
 
     return app
 

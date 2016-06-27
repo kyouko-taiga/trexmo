@@ -33,16 +33,15 @@ def parse_auth():
 
     try:
         auth = signer.unsign(auth_token, max_age=current_app.config['AUTH_TOKEN_DURATION'])
-        auth.decode()
     except BadSignature:
         raise InvalidTokenError()
     except SignatureExpired:
         raise ExpiredTokenError()
 
-    return auth
+    return auth.decode()
 
 
-def require_auth_token(f):
+def require_auth(f):
     """A decorator that is used on views to ensure that a valid authentication
     token was attached to the request. The decorated function is called with
     the user UID obtained from the token as an additional argument.
