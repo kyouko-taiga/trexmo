@@ -1,4 +1,5 @@
 import React from 'react'
+import {FormGroup, FormControl, ControlLabel, Button} from 'react-bootstrap'
 
 import 'whatwg-fetch'
 
@@ -44,8 +45,8 @@ export default class LoginForm extends React.Component {
                         document.cookie =
                             `Auth-Token=${json.token}; expires=${date.toUTCString()};`
 
-                        // Reload the view.
-                        location.reload(true)
+                        // Navigate to the index.
+                        window.location = '/'
                     } else {
                         // Handle a failed authentication.
                         this.setState({error: json.message})
@@ -92,35 +93,29 @@ export default class LoginForm extends React.Component {
 
         return (
             <form onSubmit={this.submit}>
-                <div className="form-group">
-                    <label for="username" className="sr-only">Uername or email</label>
-                    <input
+                <FormGroup controlId="username">
+                    <ControlLabel className="sr-only">Username or email</ControlLabel>
+                    <FormControl
                         onChange={this.handleUsernameChange}
-                        id="username"
                         type="text"
-                        className="form-control"
                         placeholder="Username or email"
                         value={this.state.username}
                         required autofocus
                     />
-                </div>
-                <div className="form-group">
-                    <label for="password" className="sr-only">Password</label>
-                    <input
+                </FormGroup>
+                <FormGroup controlId="password">
+                    <ControlLabel className="sr-only">Password</ControlLabel>
+                    <FormControl
                         onChange={this.handlePasswordChange}
-                        id="password"
                         type="password"
-                        className="form-control"
                         placeholder="Password"
                         value={this.state.password}
                         required
                     />
-            </div>
-            {error_message}
-            <div className="form-group">
-              <input type="submit" className="btn btn-lg btn-primary btn-block" value="Sign in" />
-            </div>
-          </form>
+                </FormGroup>
+                {error_message}
+                <Button type="submit" className="btn btn-primary btn-block">Sign in</Button>
+            </form>
         )
     }
 }

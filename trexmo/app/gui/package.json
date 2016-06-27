@@ -21,6 +21,7 @@
         "normalizr": "latest",
         "object-assign": "latest",
         "react": "latest",
+        "react-bootstrap": "~0.29.5",
         "react-dom": "latest",
         "whatwg-fetch": "latest"
     },
