@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -6,8 +6,8 @@
   <meta name="viewport" constent="width=device-width, initial-scale=1">
   <title>TREXMO</title>
 
-  <!-- bootstrap stylesheets -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }}">
 
   <!-- creative loading effects stylesheets -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/normalize.css') }}" />
@@ -18,12 +18,12 @@
   <!-- trexmo core stylesheets -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/trexmo.css') }}" />
 </head>
-<body style="padding-top: 50px;">
-  <div id="trxm-content">{% block content %}{% endblock %}</div>
+<body style="padding-top: 60px;">
+  <div id="trxm-content">
+    {% block content %}{% endblock %}
+  </div>
 
   <!-- global scripts -->
-  <script src="{{ url_for('static', filename='bootstrap/js/jquery-2.1.0.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
   <script src="{{ url_for('static', filename='codrops/js/modernizr.custom.js') }}"></script>
 	<script src="{{ url_for('static', filename='codrops/js/classie.js') }}"></script>
 	<script src="{{ url_for('static', filename='codrops/js/notificationFx.js') }}"></script>
