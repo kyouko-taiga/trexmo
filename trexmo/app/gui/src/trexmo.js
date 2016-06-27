@@ -5,7 +5,6 @@ import LoginView from 'trexmo/views/LoginView'
 
 
 const routes = {
-    '/': LoginView,
     '/login': LoginView
 }
 

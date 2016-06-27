@@ -1,4 +1,4 @@
-from flask import jsonify, render_template, request
+from flask import jsonify, redirect, request, url_for
 
 from werkzeug.contrib.cache import RedisCache
 
@@ -35,7 +35,7 @@ def create_app(debug=False):
     @app.errorhandler(AuthenticationError)
     def handle_auth_error(error):
         if not request.is_xhr:
-            return render_template('login.html'), 403
+            return redirect(url_for('login.login')), 403
         else:
             return jsonify({'error': 'forbidden'}), 403
 

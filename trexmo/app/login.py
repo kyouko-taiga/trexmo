@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, render_template, request
 
 from passlib.hash import pbkdf2_sha256
 
@@ -10,7 +10,7 @@ from trexmo.core.utils.auth import make_auth_token
 from trexmo.core.utils.time import utcnow
 
 
-bp = Blueprint('auth', __name__)
+bp = Blueprint('login', __name__)
 
 
 @bp.route('/auth/tokens/', methods=['POST'])
@@ -63,3 +63,8 @@ def create_token():
         'token': token,
         'expires_at': utcnow().timestamp() + current_app.config['AUTH_TOKEN_DURATION']
     }), 201
+
+
+@bp.route('/login')
+def login():
+    return render_template('login.html')
