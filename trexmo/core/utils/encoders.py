@@ -4,6 +4,8 @@ from datetime import datetime
 
 from flask.json import JSONEncoder
 
+from trexmo.core.db.models import Determinant
+
 
 class YaffelJsonEncoder(JSONEncoder):
 
@@ -34,4 +36,6 @@ class TrexmoJsonEncoder(YaffelJsonEncoder):
     def default(self, obj):
         if isinstance(obj, Determinant):
             return self.encode(obj.value)
+        if obj in (int, float, str):
+            return str(obj)
         return YaffelJsonEncoder.default(self, obj)
