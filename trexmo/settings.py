@@ -7,14 +7,13 @@ basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data', 'trexmo.db')
 
 # Caching
-CACHE_BACKEND = 'Redis'
-CACHE_CONFIG = {
-    'host': 'localhost',
-    'port': 6379,
-    'password': None,
-    'db': 0,
-    'default_timeout': 300
-}
+CACHE_TYPE = 'redis'
+CACHE_KEY_PREFIX = 'trxm-'
+CACHE_DEFAULT_TIMEOUT = 300
+CACHE_REDIS_HOST = 'localhost'
+CACHE_REDIS_PORT = 6379
+CACHE_REDIS_PASSWORD = None
+CACHE_REDIS_DB = 0
 
 # Authentication
 SECRET_KEY = '108-e08-c20'
