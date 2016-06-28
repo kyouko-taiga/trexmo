@@ -12,7 +12,7 @@ bp = Blueprint('scenarii', __name__)
 
 @bp.route('/scenarii/')
 @require_auth
-def list_models(auth):
+def list_scenarii(auth):
     """
     .. http:get:: /scenarii/
 
@@ -24,7 +24,7 @@ def list_models(auth):
     """
     scenarii_root = os.path.join(current_app.config['SCENARII_ROOT_DIR'], auth)
     if (os.path.isdir(scenarii_root)):
-        scenarii = Scenario.all()
+        scenarii = Scenario.all(scenarii_root)
     else:
         scenarii = []
 

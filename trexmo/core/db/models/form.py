@@ -29,6 +29,14 @@ class Form(Dictionarizable):
 
     @classmethod
     def load(cls, file):
+        # Note that we can't decorate this method with flask.ext.cache.memoize
+        # because it will can loaded outside of an application context.
+        cache_key = (
+            current_app.config['CACHE_KEY_PREFIX'] + cls.__name__ + '.load?' + file.name)
+        rv = current_app.cache.get(cache_key)
+        if rv is not None:
+            return rv
+
         data = ordered_loader(file)
         rv = cls()
 
@@ -46,25 +54,17 @@ class Form(Dictionarizable):
         rv.label = data.get('label', rv.name)
         rv.version = data.get('version', None)
 
+        current_app.cache.set(cache_key, rv)
         return rv
 
     @classmethod
     def all(cls, directory):
-        # Note that we can't decorate this method with flask.ext.cache.memoize
-        # because it will can loaded outside of an application context.
-        cache_key = (
-            current_app.config['CACHE_KEY_PREFIX'] + cls.__name__ + '.all?' + directory)
-        rv = current_app.cache.get(cache_key)
-        if rv is not None:
-            return rv
-
         rv = []
         for filename in os.listdir(directory):
             if not filename.startswith('.'):
                 with open(os.path.join(directory, filename), 'r') as f:
                     rv.append(cls.load(f))
 
-        current_app.cache.set(cache_key, rv)
         return rv
 
     @classmethod

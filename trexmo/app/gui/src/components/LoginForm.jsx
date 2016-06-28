@@ -1,7 +1,7 @@
+import 'whatwg-fetch'
+
 import React from 'react'
 import {FormGroup, FormControl, ControlLabel, Button} from 'react-bootstrap'
-
-import 'whatwg-fetch'
 
 
 export default class LoginForm extends React.Component {
