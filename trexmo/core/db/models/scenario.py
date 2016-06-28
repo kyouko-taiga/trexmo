@@ -2,9 +2,11 @@ import json
 import os
 import uuid
 
+from datetime import datetime
+
 from flask import current_app
 
-from trexmo.core.utils.time import utcnow
+from trexmo.core.utils.time import from_unix_timestramp, utcnow
 
 from ..dictionarization import Dictionarizable
 
@@ -26,9 +28,15 @@ class Scenario(Dictionarizable):
         self.name = name
         self.substance = substance
         self.cas = cas
-        self.created_at = created_at or utcnow()
         self.description = description
         self.determinants = determinants or {}
+
+        if isinstance(created_at, datetime):
+            self.created_at = created_at
+        elif isinstance(created_at, int):
+            self.created_at = from_unix_timestramp(created_at)
+        else:
+            self.created_at = utcnow()
 
         if model:
             # The model field can be an actual instance of Model, or simply a
