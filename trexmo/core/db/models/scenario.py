@@ -6,7 +6,8 @@ from datetime import datetime
 
 from flask import current_app
 
-from trexmo.core.utils.time import from_unix_timestramp, utcnow
+from trexmo.core.utils.encoders import TrexmoJsonEncoder
+from trexmo.core.utils.time import from_unix_timestamp, utcnow
 
 from ..dictionarization import Dictionarizable
 
@@ -22,7 +23,7 @@ class Scenario(Dictionarizable):
 
     def __init__(
             self, uid=None, name=None, substance=None, cas=None,
-            created_at=None, model=None, determinants=None):
+            description=None, created_at=None, model=None, determinants=None):
 
         self.uid = uid or uuid.uuid4().hex
         self.name = name
@@ -34,7 +35,7 @@ class Scenario(Dictionarizable):
         if isinstance(created_at, datetime):
             self.created_at = created_at
         elif isinstance(created_at, int):
-            self.created_at = from_unix_timestramp(created_at)
+            self.created_at = from_unix_timestamp(created_at)
         else:
             self.created_at = utcnow()
 
@@ -45,10 +46,15 @@ class Scenario(Dictionarizable):
                 self.model = model
             else:
                 model_root = current_app.config['MODELS_ROOT_DIR']
-                with open(os.path.join(model_root, model), 'r') as f:
-                    self.model = Model.load(f)
+                self.model = Model.get(model_root, model)
         else:
             self.model = None
+
+    def save(self, file):
+        # Note that we don't serialize the model instance, but only its name.
+        data = self.to_dict()
+        data['model'] = self.model.name
+        json.dump(data, file, sort_keys=True, indent=4, cls=TrexmoJsonEncoder)
 
     @classmethod
     def load(cls, file):
