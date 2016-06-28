@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask.ext.cache import Cache
 
 from sqlalchemy import create_engine
 
@@ -28,6 +29,8 @@ def create_app(package_name, package_path, debug=False):
 
     app.db_engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     app.teardown_appcontext(remove_db_session)
+
+    app.cache = Cache(app, config=app.config)
 
     register_blueprints(app, package_name, package_path)
     return app

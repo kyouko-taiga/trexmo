@@ -1,5 +1,9 @@
+from ..dictionarization import Dictionarizable
 
-class Determinant(object):
+
+class Determinant(Dictionarizable):
+
+    _dictionarizable_attrs = ('value', 'select', 'exp_selection')
 
     def __init__(self, value, selection=None, exp_selection=None):
         self.value = value

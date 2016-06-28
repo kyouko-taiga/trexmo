@@ -16,6 +16,9 @@ def list_models(auth):
     .. http:get:: /models/
 
         Return the list of models of exposure.
+
+        :return:
+            A list of :class:`~trexmo.core.db.models.model.Model` instances.
     """
     models = Model.all(current_app.config['MODELS_ROOT_DIR'])
     return jsonify_list([it.to_dict() for it in models])

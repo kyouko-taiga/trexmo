@@ -50,11 +50,14 @@ class Scenario(Dictionarizable):
         else:
             self.model = None
 
+    def to_dict(self):
+        # Don't serialize the model instance, but only its name.
+        rv = super().to_dict()
+        rv['model'] = self.model.name
+        return rv
+
     def save(self, file):
-        # Note that we don't serialize the model instance, but only its name.
-        data = self.to_dict()
-        data['model'] = self.model.name
-        json.dump(data, file, sort_keys=True, indent=4, cls=TrexmoJsonEncoder)
+        json.dump(self.to_dict(), file, sort_keys=True, indent=4, cls=TrexmoJsonEncoder)
 
     @classmethod
     def load(cls, file):
