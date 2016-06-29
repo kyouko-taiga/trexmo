@@ -1,24 +1,38 @@
 import React from 'react'
-import {render} from 'react-dom'
 
 import IndexView from 'trexmo/views/IndexView'
 import LoginView from 'trexmo/views/LoginView'
 
+import AppNavbar from 'trexmo/components/AppNavbar'
+import NotificationAlert from 'trexmo/components/NotificationAlert'
 
+import Router from './Router'
+
+
+// Define a view wrapper that includes the navigation menu as well as the 
+// dialog and alert components.
+const LoggedWrapper = (View) => class extends React.Component {
+    render() {
+        return (
+            <div>
+                <AppNavbar />
+                <NotificationAlert />
+                <View {...this.props} />
+            </div>
+        )
+    }
+}
+
+
+// Define the application routes.
 const routes = {
-    '/': IndexView,
-    '/login': LoginView
+    '/': LoggedWrapper(IndexView),
+    '/login': LoginView,
+    '/scenarii/<uid>': IndexView
 }
+let router = new Router(routes, document.getElementById('trxm-content'))
 
 
-// console.log(window.location.hash.substring(1))
-
-
-// Render the view corresponding the the current window location.
-let loc = window.location.pathname
-if (routes.hasOwnProperty(loc)) {
-    let view = routes[loc]
-    render(React.createElement(view, null), document.getElementById('trxm-content'))
-} else {
-    console.error(`There isn't any view associated with the current location: "${loc}"`)
-}
+// Render the application.
+window.onhashchange = (() => { router.render() })
+router.render()
