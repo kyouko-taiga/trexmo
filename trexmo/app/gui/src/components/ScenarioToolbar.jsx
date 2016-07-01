@@ -3,6 +3,7 @@ import assign from 'object-assign'
 import React from 'react'
 import {Button, ButtonToolbar} from 'react-bootstrap'
 
+import ConfirmActions from 'trexmo/actions/ConfirmActions'
 import NotificationActions from 'trexmo/actions/NotificationActions'
 import PromptActions from 'trexmo/actions/PromptActions'
 import ScenarioActions from 'trexmo/actions/ScenarioActions'
@@ -41,7 +42,12 @@ export default class ScenarioToolbar extends React.Component {
     }
 
     handleDelete() {
-        ScenarioActions.delete(this.props.scenario.uid)
+        ConfirmActions.confirm(<h4>Delete {this.props.scenario.name}?</h4>)
+            .then((answer) => {
+                if (answer) {
+                    return ScenarioActions.delete(this.props.scenario.uid)
+                }
+            })
             .catch((error) => {
                 console.error(error)
                 NotificationActions.show(

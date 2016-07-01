@@ -7,7 +7,7 @@ import PromptStore from 'trexmo/stores/PromptStore'
 
 
 export default StoreConnector(
-    class Notification extends React.Component {
+    class Prompt extends React.Component {
         constructor() {
             super()
 
