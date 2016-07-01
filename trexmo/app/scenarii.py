@@ -47,6 +47,10 @@ def create_scenario(auth):
             The cas number of the substance under consideration (optional).
         :json model:
             The name of the model of exposure (required).
+        :json description:
+            The description of the scenario (optional).
+        :json determinants:
+            A dictionary containing the determinants to be updated (optional).
 
         :return:
             The created scenario as an instance of
@@ -65,7 +69,9 @@ def create_scenario(auth):
         name=post_data['name'],
         model=post_data['model'],
         substance=post_data.get('substance'),
-        cas=post_data.get('cas')
+        cas=post_data.get('cas'),
+        description=post_data.get('description'),
+        determinants=post_data.get('determinants')
     )
 
     # Make sure the directory for scenarii exists.

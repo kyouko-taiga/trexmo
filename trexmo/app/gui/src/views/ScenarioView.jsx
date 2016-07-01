@@ -119,10 +119,7 @@ class DefaultView extends React.Component {
                                 {title}
                             </div>
                             <div className="pull-right">
-                                <ScenarioToolbar
-                                    uid={this.props.scenario.uid}
-                                    modified={this.props.scenario.__modified__}
-                                />
+                                <ScenarioToolbar scenario={this.props.scenario} />
                             </div>
                         </div>
                     </PageHeader>

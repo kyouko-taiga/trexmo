@@ -29,5 +29,5 @@ export default StoreConnector(
     },
 
     NotificationStore,
-    (props) => NotificationStore.state
+    (props) => (NotificationStore.state)
 )

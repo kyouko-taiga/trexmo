@@ -5,7 +5,12 @@ class NotificationStore extends BaseStore {
     constructor() {
         super()
         this.subscribe(() => this._registerToActions.bind(this))
-        this._state = {}
+
+        this._state = {
+            level: 'danger',
+            message: '',
+            visible: false
+        }
     }
 
     get state() {

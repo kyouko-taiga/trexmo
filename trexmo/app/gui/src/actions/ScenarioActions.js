@@ -80,10 +80,15 @@ function createScenario(data) {
             return response.json()
                 .then((json) => {
                     if (response.status == 201) {
+                        // Dispatch a GET_SCENARIO action to store the new
+                        // scenario.
                         Dispatcher.dispatch({
                             actionType: 'GET_SCENARIO',
                             response: normalize(json, Models.scenario)
                         })
+
+                        // Return the UID of the new scenario.
+                        return json.uid
                     } else {
                         throw new Error(json.message)
                     }

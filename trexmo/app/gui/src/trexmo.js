@@ -5,7 +5,9 @@ import LoginView from 'trexmo/views/LoginView'
 import ScenarioView from 'trexmo/views/ScenarioView'
 
 import AppNavbar from 'trexmo/components/AppNavbar'
-import NotificationAlert from 'trexmo/components/NotificationAlert'
+
+import Notification from 'trexmo/components/dialogs/Notification'
+import Prompt from 'trexmo/components/dialogs/Prompt'
 
 import Router from './Router'
 
@@ -17,7 +19,8 @@ const LoggedWrapper = (View) => class extends React.Component {
         return (
             <div>
                 <AppNavbar />
-                <NotificationAlert />
+                <Notification />
+                <Prompt />
                 <View {...this.props} />
             </div>
         )
