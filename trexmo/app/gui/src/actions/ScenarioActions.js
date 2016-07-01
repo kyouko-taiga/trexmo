@@ -6,6 +6,7 @@ import {arrayOf, normalize} from 'normalizr'
 
 import Dispatcher from 'trexmo/Dispatcher'
 import Models from 'trexmo/db/Models'
+import ScenarioStore from 'trexmo/stores/ScenarioStore'
 
 import {readCookie} from 'trexmo/utils/cookies'
 
@@ -109,9 +110,36 @@ function updateScenario(data) {
 }
 
 
+function saveScenario(uid) {
+    return fetch(`/scenarii/${uid}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        },
+        body: JSON.stringify(ScenarioStore.one(uid))
+    })
+        .then((response) => {
+            return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'GET_SCENARIO',
+                            response: normalize(json, Models.scenario)
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
+        })
+}
+
+
 export default {
     list: listScenarii,
     get: getScenario,
     create: createScenario,
-    update: updateScenario
+    update: updateScenario,
+    save: saveScenario
 }

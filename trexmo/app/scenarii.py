@@ -106,6 +106,57 @@ def get_scenario(auth, uid):
         scenario = Scenario.load(f)
 
     return jsonify(scenario.to_dict()), 200
+    
+
+@bp.route('/scenarii/<uid>', methods=['POST'])
+@require_auth
+def save_scenario(auth, uid):
+    """
+    .. http:post:: /scenarii/(uid)
+
+        Save a scenario identified by its UID, with the given data.
+
+        :param uid:
+            The UID of the scenario to save.
+
+        :json name:
+            The name of the scenario.
+        :json substance:
+            The substance under consideration.
+        :json cas:
+            The cas number of the substance under consideration.
+        :json description:
+            The description of the scenario.
+        :json determinants:
+            A dictionary containing the determinants to be updated.
+
+    .. note::
+        Note that the model of exposure of a scenario cannot be modified with
+        this endpoint, as it requires the translation of its determinants. Use
+        :func:`translate_scenario_determinants` instead.    
+    """
+    post_data = request.get_json(force=True)
+
+    # Make sure the scenario file exists.
+    filename = os.path.join(current_app.config['SCENARII_ROOT_DIR'], auth, uid)
+    if not os.path.exists(filename):
+        return jsonify({'message': 'Scenario not found.'}), 404
+
+    # Load the scenario and update its values.
+    with open(filename, 'r') as f:
+        scenario = Scenario.load(f)
+
+    scenario.name = post_data.get('name', scenario.name)
+    scenario.substance = post_data.get('substance', scenario.substance)
+    scenario.cas = post_data.get('cas', scenario.cas)
+    scenario.description = post_data.get('description', scenario.description)
+    scenario.determinants = post_data.get('determinants', scenario.determinants)
+
+    # Save the updated scenario and return ot.
+    with open(filename, 'w') as f:
+        scenario.save(f)
+
+    return jsonify(scenario.to_dict()), 200
 
 
 @bp.route('/scenarii/<uid>', methods=['DELETE'])
@@ -114,10 +165,10 @@ def delete_scenario(auth, uid):
     """
     .. http:delete:: /scenarii/(uid)
 
+        Delete a scenario, identified by its UID.
+
         :param uid:
             The UID of the scenario to delete.
-
-       Delete a single scenario, identified by its UID.
     """
     # Make sure the scenario file exists.
     filename = os.path.join(current_app.config['SCENARII_ROOT_DIR'], auth, uid)

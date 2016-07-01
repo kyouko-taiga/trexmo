@@ -32,6 +32,7 @@ class ScenarioStore extends BaseStore {
         const scenarii = action.response.entities.scenarii
         for (let it in scenarii) {
             this._insertOrUpdate(scenarii[it])
+            this._scenarii[it].__modified__ = false
         }
 
         this.emitChange()
@@ -52,7 +53,7 @@ class ScenarioStore extends BaseStore {
 
             // If the scenario we have comes from the DB, we store its current
             // state and mark it as modified.
-            if ((typeof scenario.__modified__ === 'undefined') || (!scenario.__modified__)) {
+            if (!scenario.__modified__) {
                 this._rollback[data.uid] = assign({}, scenario)
                 scenario.__modified__ = true
             }
@@ -68,7 +69,7 @@ class ScenarioStore extends BaseStore {
         if (this._scenarii.hasOwnProperty(data.uid)) {
             this._scenarii[data.uid] = assign(this._scenarii[data.uid], data)
         } else {
-            this._scenarii[data.uid] = assign({}, data)
+            this._scenarii[data.uid] = assign({__modified__: false}, data)
         }
     }
 

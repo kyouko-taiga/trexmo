@@ -1,12 +1,31 @@
 import React from 'react'
 import {Button, ButtonToolbar} from 'react-bootstrap'
 
+import ScenarioActions from 'trexmo/actions/ScenarioActions'
+
 
 export default class ScenarioToolbar extends React.Component {
+    constructor() {
+        super()
+
+        this.handleSave = this.handleSave.bind(this)
+    }
+
+    handleSave() {
+        ScenarioActions.save(this.props.uid)
+            .catch((error) => {
+                console.error(error)
+            })
+    }
+
     render() {
         return (
             <ButtonToolbar>
-                <Button bsStyle="success" disabled={!this.props.modified}>
+                <Button
+                    onClick={this.handleSave}
+                    bsStyle="success"
+                    disabled={!this.props.modified}
+                >
                     <i className="fa fa-fw fa-floppy-o" />Save
                 </Button>
                 <Button bsStyle="warning">
