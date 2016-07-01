@@ -136,10 +136,27 @@ function saveScenario(uid) {
 }
 
 
+function deleteScenario(uid) {
+    Dispatcher.dispatch({
+        actionType: 'DELETE_SCENARIO',
+        args: {uid: uid}
+    })
+
+    return fetch(`/scenarii/${uid}`, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        }
+    })
+}
+
+
 export default {
     list: listScenarii,
     get: getScenario,
     create: createScenario,
     update: updateScenario,
-    save: saveScenario
+    save: saveScenario,
+    delete: deleteScenario
 }

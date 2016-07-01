@@ -6,6 +6,7 @@ import StoreConnector from 'trexmo/connectors/StoreConnector'
 import ScenarioActions from 'trexmo/actions/ScenarioActions'
 import ScenarioStore from 'trexmo/stores/ScenarioStore'
 
+import Link from 'trexmo/components/Link'
 import Scenario from 'trexmo/components/Scenario'
 import ScenarioToolbar from 'trexmo/components/ScenarioToolbar'
 
@@ -25,11 +26,11 @@ export default StoreConnector(
             // Fetch the scenario if we don't have it in props yet.
             if (!this.props.scenario) {
                 ScenarioActions.get(this.props.uid)
+                    .catch((error) => {
+                        this.setState({error: error})
+                    })
                     .then(() => {
                         this.setState({loading: false})
-                    })
-                    .catch((error) => {
-                        this.setState({error: error.message})
                     })
             } else {
                 this.setState({loading: false})
@@ -37,16 +38,30 @@ export default StoreConnector(
         }
 
         render() {
-            // Show the error that occured if we failed fetching the scenario.
-            if (this.state.error !== null) {
-                return <ErrorView error={this.state.error} />
-            }
-
-            // Show a loading page if the we are still fetching the scenario.
+            // Show the loading view if the we are still loading the scenario.
             if (this.state.loading) {
                 return <LoadingView />
             }
 
+            // Show the error view if we failed to load the scenario.
+            if (this.state.error !== null) {
+                return (
+                    <ErrorView>
+                        <p>{this.state.error.message}</p>
+                    </ErrorView>
+                )
+            }
+
+            // She the error view if the scenario couldn't be found.
+            if (typeof this.props.scenario === 'undefined') {
+                return (
+                    <ErrorView>
+                        <p>The exposure situation does not exist or was deleted.</p>
+                    </ErrorView>
+                )
+            }
+
+            // Show the default view if we could get the scenario.
             return <DefaultView scenario={this.props.scenario} />
         }
     },
@@ -75,12 +90,13 @@ class ErrorView extends React.Component {
             <Grid>
                 <Row>
                     <PageHeader>
-                        <i className="fa fa-fw fa-warning" /> Error
+                        <i className="fa fa-fw fa-warning" />
+                        Unable to load the exposure situation
                     </PageHeader>
                     <Alert bsStyle="danger">
-                        <strong>Unable to load the scenario</strong>
-                        <p>{this.props.error}</p>
+                        {this.props.children}
                     </Alert>
+                    <Link href="/">Click here</Link> to come back to the list of exposure situations.
                 </Row>
             </Grid>
         )

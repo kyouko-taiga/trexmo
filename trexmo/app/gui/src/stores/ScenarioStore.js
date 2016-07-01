@@ -65,6 +65,12 @@ class ScenarioStore extends BaseStore {
         this.emitChange()
     }
 
+    DELETE_SCENARIO(action) {
+        delete this._scenarii[action.args.uid]
+        delete this._rollback[action.args.uid]
+        this.emitChange()
+    }
+
     _insertOrUpdate(data) {
         if (this._scenarii.hasOwnProperty(data.uid)) {
             this._scenarii[data.uid] = assign(this._scenarii[data.uid], data)

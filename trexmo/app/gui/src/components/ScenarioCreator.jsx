@@ -113,6 +113,7 @@ class ScenarioFormContainer extends React.Component {
                     onModelChange={this.handleModelChange}
                     onSubstanceChange={this.handleSubstanceChange}
                     onCasChange={this.handleCasChange}
+                    {...this.state}
                 />
                 <div className="text-right">
                     <ButtonToolbar>

@@ -63,7 +63,10 @@ export default class Router {
             location = '/login'
         } else {
             // Read the anchor value.
-            location = '/' + window.location.hash.substring(1)
+            location = window.location.hash.substring(1)
+            if ((location.length == 0) || (location[0] != '/')) {
+                location = '/' + location
+            }
         }
 
         // Find the first route that matches.

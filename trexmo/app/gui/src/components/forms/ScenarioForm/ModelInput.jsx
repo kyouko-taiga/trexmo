@@ -110,18 +110,16 @@ class ModelFormControl extends React.Component {
         })
 
         // Create a placeholder if no value has been provided.
-        if (!this.props.value) {
+        let value = this.props.value
+        if (!value) {
+            value = 'placeholder'
             options.unshift(
-                <option key="placeholder" selected disabled>Model of exposure</option>
+                <option key="placeholder" value="placeholder" disabled>Model of exposure</option>
             )
         }
 
         return (
-            <FormControl
-                onChange={this.props.onChange}
-                componentClass="select"
-                value={this.props.value}
-            >
+            <FormControl onChange={this.props.onChange} componentClass="select" value={value}>
                 {options}
             </FormControl>
         )
