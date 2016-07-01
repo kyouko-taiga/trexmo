@@ -17,12 +17,16 @@ function listModels() {
     })
         .then((response) => {
             return response.json()
-        })
-        .then((json) => {
-            Dispatcher.dispatch({
-                actionType: 'LIST_MODELS',
-                response: normalize(json, arrayOf(Models.model))
-            })
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'LIST_MODELS',
+                            response: normalize(json, arrayOf(Models.model))
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
         })
 }
 

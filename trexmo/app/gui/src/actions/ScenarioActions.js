@@ -19,12 +19,17 @@ function listScenarii() {
     })
         .then((response) => {
             return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'LIST_SCENARII',
+                            response: normalize(json, arrayOf(Models.scenario))
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
         })
-        .then((json) => {
-            Dispatcher.dispatch({
-                actionType: 'LIST_SCENARII',
-                response: normalize(json, arrayOf(Models.scenario))
-            })
         })
 }
 
