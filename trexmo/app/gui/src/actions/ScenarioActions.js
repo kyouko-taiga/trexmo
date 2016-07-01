@@ -98,8 +98,20 @@ function createScenario(data) {
 }
 
 
+function updateScenario(data) {
+    return new Bluebird((resolve, reject) => {
+        Dispatcher.dispatch({
+            actionType: 'UPDATE_SCENARIO',
+            data: data
+        })
+        resolve()
+    })
+}
+
+
 export default {
     list: listScenarii,
     get: getScenario,
-    create: createScenario
+    create: createScenario,
+    update: updateScenario
 }

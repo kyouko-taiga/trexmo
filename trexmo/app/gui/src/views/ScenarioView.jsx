@@ -90,16 +90,23 @@ class ErrorView extends React.Component {
 
 class DefaultView extends React.Component {
     render() {
+        const title = (this.props.scenario.__modified__ === true)
+            ? this.props.scenario.name + '*'
+            : this.props.scenario.name
+
         return (
             <Grid>
                 <Row>
                     <PageHeader>
                         <div className="clearfix">
                             <div className="pull-left">
-                                {this.props.scenario.name}
+                                {title}
                             </div>
                             <div className="pull-right">
-                                <ScenarioToolbar />
+                                <ScenarioToolbar
+                                    uid={this.props.scenario.uid}
+                                    modified={this.props.scenario.__modified__}
+                                />
                             </div>
                         </div>
                     </PageHeader>

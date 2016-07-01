@@ -3,6 +3,7 @@ import moment from 'moment'
 import React from 'react'
 import {Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 
+import ScenarioActions from 'trexmo/actions/ScenarioActions'
 import StoreConnector from 'trexmo/connectors/StoreConnector'
 
 import ScenarioForm from './forms/ScenarioForm'
@@ -12,14 +13,6 @@ export default class Scenario extends React.Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            name: undefined,
-            description: undefined,
-            model: undefined,
-            substance: undefined,
-            cas: undefined
-        }
-
         this.handleDescriptionChange = this.handleDescriptionChange.bind(this)
         this.handleNameChange = this.handleNameChange.bind(this)
         this.handleModelChange = this.handleModelChange.bind(this)
@@ -28,56 +21,42 @@ export default class Scenario extends React.Component {
     }
 
     handleDescriptionChange(e) {
-        this.setState({description: e.target.value})
-        if (typeof this.props.onChange === 'function') {
-            this.props.onChange()
-        }
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            description: e.target.value
+        })
     }
 
     handleNameChange(e) {
-        this.setState({name: e.target.value})
-        if (typeof this.props.onChange === 'function') {
-            this.props.onChange()
-        }
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            name: e.target.value
+        })
     }
 
     handleModelChange(e) {
-        this.setState({model: e.target.value})
-        if (typeof this.props.onChange === 'function') {
-            this.props.onChange()
-        }
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            model: e.target.value
+        })
     }
 
     handleSubstanceChange(e) {
-        this.setState({substance: e.target.value})
-        if (typeof this.props.onChange === 'function') {
-            this.props.onChange()
-        }
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            substance: e.target.value
+        })
     }
 
     handleCasChange(e) {
-        this.setState({cas: e.target.value})
-        if (typeof this.props.onChange === 'function') {
-            this.props.onChange()
-        }
-    }
-
-    formValues(props) {
-        const state = this.state
-        const scenario = props.scenario
-
-        let rv = {}
-        for (let prop in scenario) {
-            rv[prop] = (typeof state[prop] !== 'undefined')
-                ? state[prop]
-                : scenario[prop]
-        }
-
-        return rv
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            cas: e.target.value
+        })
     }
 
     render() {
-        const values = this.formValues(this.props)
+        const scenario = this.props.scenario
 
         return (
             <Row>
@@ -91,7 +70,7 @@ export default class Scenario extends React.Component {
                             componentClass="textarea"
                             className="trxm-scenario-description"
                             placeholder="Type a description of the scenario here."
-                            value={values.description}
+                            value={scenario.description}
                         >
                         </FormControl>
                     </FormGroup>
@@ -102,7 +81,7 @@ export default class Scenario extends React.Component {
                         onModelChange={this.handleModelChange}
                         onSubstanceChange={this.handleSubstanceChange}
                         onCasChange={this.handleCasChange}
-                        {...values}
+                        {...scenario}
                     />
                 </Col>
             </Row>

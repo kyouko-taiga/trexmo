@@ -8,6 +8,10 @@ class ScenarioStore extends BaseStore {
         super()
         this.subscribe(() => this._registerToActions.bind(this))
         this._scenarii = {}
+
+        // Keep track of the previous state, so the store can roll back if an
+        // optimistic update fails or aborts.
+        this._rollback = {}
     }
 
     /** Return a single scenario from its UID. */
@@ -35,6 +39,29 @@ class ScenarioStore extends BaseStore {
 
     GET_SCENARIO(action) {
         this.LIST_SCENARII(action)
+    }
+
+    UPDATE_SCENARIO(action) {
+        const data = action.data
+
+        if (!this._scenarii.hasOwnProperty(data.uid)) {
+            // Store the scenario if we didn't have it yet.
+            this._scenarii[data.uid] = assign({__modified__: true}, data)
+        } else {
+            let scenario = this._scenarii[data.uid]
+
+            // If the scenario we have comes from the DB, we store its current
+            // state and mark it as modified.
+            if ((typeof scenario.__modified__ === 'undefined') || (!scenario.__modified__)) {
+                this._rollback[data.uid] = assign({}, scenario)
+                scenario.__modified__ = true
+            }
+
+            // Update the state of the scenario.
+            this._scenarii[data.uid] = assign(scenario, data)
+        }
+
+        this.emitChange()
     }
 
     _insertOrUpdate(data) {

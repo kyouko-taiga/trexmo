@@ -6,7 +6,7 @@ export default class ScenarioToolbar extends React.Component {
     render() {
         return (
             <ButtonToolbar>
-                <Button bsStyle="success">
+                <Button bsStyle="success" disabled={!this.props.modified}>
                     <i className="fa fa-fw fa-floppy-o" />Save
                 </Button>
                 <Button bsStyle="warning">
