@@ -2,6 +2,7 @@ import React from 'react'
 
 import IndexView from 'trexmo/views/IndexView'
 import LoginView from 'trexmo/views/LoginView'
+import ScenarioView from 'trexmo/views/ScenarioView'
 
 import AppNavbar from 'trexmo/components/AppNavbar'
 import NotificationAlert from 'trexmo/components/NotificationAlert'
@@ -26,9 +27,9 @@ const LoggedWrapper = (View) => class extends React.Component {
 
 // Define the application routes.
 const routes = {
-    '/': LoggedWrapper(IndexView),
     '/login': LoginView,
-    '/scenarii/<uid>': IndexView
+    '/': LoggedWrapper(IndexView),
+    '/scenarii/<uid>': LoggedWrapper(ScenarioView)
 }
 let router = new Router(routes, document.getElementById('trxm-content'))
 

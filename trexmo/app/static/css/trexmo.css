@@ -14,3 +14,8 @@
 .trxm-notification-alert.trxm-hidden {
     opacity: 0;
 }
+
+.trxm-scenario-description {
+    min-height: 100px;
+    resize: vertical;
+}

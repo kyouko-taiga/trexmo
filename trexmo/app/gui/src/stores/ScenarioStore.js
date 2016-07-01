@@ -10,12 +10,12 @@ class ScenarioStore extends BaseStore {
         this._scenarii = {}
     }
 
-    /** Return a single scenario from its name. */
-    one(name) {
-        if (!this._models.hasOwnProperty(uid)) {
+    /** Return a single scenario from its UID. */
+    one(uid) {
+        if (!this._scenarii.hasOwnProperty(uid)) {
             throw new Error(`Scenario not found: '${uid}'.`)
         }
-        return this._models[uid]
+        return this._scenarii[uid]
     }
 
     /** Return the list of all scenarii. */

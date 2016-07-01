@@ -30,6 +30,28 @@ function listScenarii() {
                     }
                 })
         })
+}
+
+
+function getScenario(uid) {
+    return fetch(`/scenarii/${uid}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        }
+    })
+        .then((response) => {
+            return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'GET_SCENARIO',
+                            response: normalize(json, Models.scenario)
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
         })
 }
 
@@ -78,5 +100,6 @@ function createScenario(data) {
 
 export default {
     list: listScenarii,
+    get: getScenario,
     create: createScenario
 }

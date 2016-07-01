@@ -23,7 +23,7 @@ class Scenario(Dictionarizable):
 
     def __init__(
             self, uid=None, name=None, substance=None, cas=None,
-            description=None, created_at=None, model=None, determinants=None):
+            description='', created_at=None, model=None, determinants=None):
 
         self.uid = uid or uuid.uuid4().hex
         self.name = name
