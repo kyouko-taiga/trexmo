@@ -1,12 +1,13 @@
+import assign from 'object-assign'
 import moment from 'moment'
 
 import React from 'react'
 import {Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 
 import ScenarioActions from 'trexmo/actions/ScenarioActions'
-import StoreConnector from 'trexmo/connectors/StoreConnector'
 
 import ScenarioForm from './forms/ScenarioForm'
+import ModelForm from './forms/ModelForm'
 
 
 export default class Scenario extends React.Component {
@@ -18,6 +19,7 @@ export default class Scenario extends React.Component {
         this.handleModelChange = this.handleModelChange.bind(this)
         this.handleSubstanceChange = this.handleSubstanceChange.bind(this)
         this.handleCasChange = this.handleCasChange.bind(this)
+        this.handleDeterminantsChange = this.handleDeterminantsChange.bind(this)
     }
 
     handleDescriptionChange(e) {
@@ -55,6 +57,20 @@ export default class Scenario extends React.Component {
         })
     }
 
+    handleDeterminantsChange(values) {
+        const determinants = this.props.scenario.determinants
+        const model_determinants = determinants[this.props.scenario.model]
+
+        const new_values = (typeof model_determinants !== 'undefined')
+            ? assign(model_determinants, values)
+            : values
+
+        ScenarioActions.update({
+            uid: this.props.scenario.uid,
+            determinants: assign(determinants, {[this.props.scenario.model]: new_values})
+        })
+    }
+
     render() {
         const scenario = this.props.scenario
 
@@ -82,6 +98,12 @@ export default class Scenario extends React.Component {
                         onSubstanceChange={this.handleSubstanceChange}
                         onCasChange={this.handleCasChange}
                         {...scenario}
+                    />
+                </Col>
+                <Col sm={12}>
+                    <ModelForm
+                        onChange={this.handleDeterminantsChange}
+                        scenario={scenario}
                     />
                 </Col>
             </Row>

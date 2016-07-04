@@ -9,7 +9,7 @@ let scenario = new Schema('scenarii', {idAttribute: 'uid'})
 
 // Then, we define the nesting rules.
 model.define({
-    forms: arrayOf(form)
+    form: form
 })
 
 

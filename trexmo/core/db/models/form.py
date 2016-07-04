@@ -13,13 +13,14 @@ from ..dictionarization import Dictionarizable
 
 class Form(Dictionarizable):
 
-    _dictionarizable_attrs = ('name', 'label', 'version', 'fields')
+    _dictionarizable_attrs = ('name', 'label', 'version', 'fields', 'fields_order')
 
-    def __init__(self, name=None, label=None, version=None, fields=None):
+    def __init__(self, name=None, label=None, version=None, fields=None, fields_order=None):
         self.name = name
         self.label = label or name
         self.version = version
         self.fields = fields
+        self.fields_order = fields_order
 
     def __getitem__(self, name):
         return self.fields[name]
@@ -46,9 +47,11 @@ class Form(Dictionarizable):
         rv.name = data['name']
 
         # Parse the form fields.
+        rv.fields_order = []
         rv.fields = OrderedDict()
         for field_name, field_data in data.get('fields', {}).items():
             rv.fields[field_name] = Field.parse(field_name, field_data)
+            rv.fields_order.append(field_name)
 
         # Parse the optional data.
         rv.label = data.get('label', rv.name)
@@ -78,18 +81,19 @@ class Form(Dictionarizable):
 class Field(Dictionarizable):
 
     _dictionarizable_attrs = (
-        'name', 'label', 'data_type', 'required', 'allows_custom', 'default',
-        'constraints', 'preconditions'
+        'name', 'label', 'data_type', 'options', 'required', 'allows_custom',
+        'default', 'constraints', 'preconditions'
     )
 
     def __init__(
-            self, name=None, label=None, data_type=None, required=False,
-            allows_custom=False, default=None, constraints=None,
-            preconditions=None):
+            self, name=None, label=None, data_type=None, options=None,
+            required=False, allows_custom=False, default=None,
+            constraints=None, preconditions=None):
 
         self.name = name
         self.label = label or name
         self.data_type = data_type
+        self.options = options or []
         self.required = required
         self.allows_custom = allows_custom
         self.default = default
@@ -136,7 +140,7 @@ class Field(Dictionarizable):
             try:
                 rv.default = yaffel.parser.parse(data['default'])[1]
             except:
-                rv.default = data['default']
+                rv.default = rv.data_type(data['default'])
 
         return rv
 
@@ -166,7 +170,7 @@ class FieldOption(Dictionarizable):
             try:
                 rv.value = yaffel.parser.parse(data['value'])[1]
             except:
-                rv.default = data['value']
+                rv.value = data['value']
 
             # Parse the option constraints and preconditions.
             rv.constraints = data.get('constraints', [])

@@ -31,6 +31,30 @@ function listModels() {
 }
 
 
+function getModel(name) {
+    return fetch(`/models/${name}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        }
+    })
+        .then((response) => {
+            return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'GET_MODEL',
+                            response: normalize(json, Models.model)
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
+        })
+}
+
+
 export default {
-    list: listModels
+    list: listModels,
+    get: getModel
 }

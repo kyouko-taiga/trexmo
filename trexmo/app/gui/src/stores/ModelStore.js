@@ -33,6 +33,10 @@ class ModelStore extends BaseStore {
         this.emitChange()
     }
 
+    GET_MODEL(action) {
+        this.LIST_MODELS(action)
+    }
+
     _insertOrUpdate(data) {
         if (this._models.hasOwnProperty(data.name)) {
             this._models[data.name] = assign(this._models[data.name], data)
