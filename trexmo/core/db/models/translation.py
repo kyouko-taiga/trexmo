@@ -67,7 +67,7 @@ class Translation(Dictionarizable):
     def get(cls, directory, source, destination):
         for trans in cls.all(directory):
             if (trans.source == source) and (trans.destination == destination):
-                return form
+                return trans
         raise KeyError((source, destination))
 
 
@@ -89,10 +89,9 @@ class Transformation(Dictionarizable):
 
             rv.fields[field] = []
 
-            for line in data[field].get('default', []):
-                rv.fields[field].append(cls._parse_line(line, 'default'))
-            for line in data[field].get('experimental', []):
-                rv.fields[field].append(cls._parse_line(line, 'experimental'))
+            for translation_type in data[field]:
+                for line in data[field][translation_type]:
+                    rv.fields[field].append(cls._parse_line(line, translation_type))
 
         return rv
 
