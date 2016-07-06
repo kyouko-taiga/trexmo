@@ -9,12 +9,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }}">
 
-  <!-- creative loading effects stylesheets -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/normalize.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/ns-default.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/ns-style-growl.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='codrops/css/component.css') }}" />
-
   <!-- trexmo core stylesheets -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/trexmo.css') }}" />
 </head>
@@ -22,11 +16,6 @@
   <div id="trxm-content">
     {% block content %}{% endblock %}
   </div>
-
-  <!-- global scripts -->
-  <script src="{{ url_for('static', filename='codrops/js/modernizr.custom.js') }}"></script>
-	<script src="{{ url_for('static', filename='codrops/js/classie.js') }}"></script>
-	<script src="{{ url_for('static', filename='codrops/js/notificationFx.js') }}"></script>
 
   <!-- trexmo core scripts -->
   {% if config['DEBUG'] %}
