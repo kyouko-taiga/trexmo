@@ -86,7 +86,7 @@ export default class Scenario extends React.Component {
                             componentClass="textarea"
                             className="trxm-scenario-description"
                             placeholder="Type a description of the scenario here."
-                            value={scenario.description}
+                            value={scenario.description || ''}
                         >
                         </FormControl>
                     </FormGroup>

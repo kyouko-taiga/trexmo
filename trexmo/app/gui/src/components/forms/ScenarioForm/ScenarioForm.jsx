@@ -14,7 +14,7 @@ export default class ScenarioForm extends React.Component {
                         onChange={this.props.onNameChange}
                         type="text"
                         placeholder="Name of the scenario"
-                        value={this.props.name}
+                        value={this.props.name || ''}
                         required
                     />
                 </FormGroup>
@@ -29,7 +29,7 @@ export default class ScenarioForm extends React.Component {
                         onChange={this.props.onSubstanceChange}
                         type="text"
                         placeholder="Name of the substance"
-                        value={this.props.substance}
+                        value={this.props.substance || ''}
                     />
                 </FormGroup>
                 <FormGroup controlId="cas">
@@ -38,7 +38,7 @@ export default class ScenarioForm extends React.Component {
                         onChange={this.props.onCasChange}
                         type="text"
                         placeholder="CAS number of the substance"
-                        value={this.props.cas}
+                        value={this.props.cas || ''}
                     />
                 </FormGroup>
             </form>
