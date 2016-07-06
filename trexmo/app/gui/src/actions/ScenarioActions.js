@@ -157,11 +157,38 @@ function deleteScenario(uid) {
 }
 
 
+function runScenario(uid) {
+    return fetch(`/scenarii/${uid}/run`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        }
+    })
+        .then((response) => {
+            return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'RUN_SCENARIO',
+                            response: json
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+
+                    // Return the UID of the execution report.
+                    return json.report_id
+                })
+        })
+}
+
+
 export default {
     list: listScenarii,
     get: getScenario,
     create: createScenario,
     update: updateScenario,
     save: saveScenario,
-    delete: deleteScenario
+    delete: deleteScenario,
+    run: runScenario
 }

@@ -9,10 +9,10 @@ def create_app(debug=False):
     """Return an instance of a TREXMO web application."""
     app = factory.create_app(__name__, __path__, debug)
 
-    # Set the default json encoder
+    # Set the default json encoder.
     app.json_encoder = TrexmoJsonEncoder
 
-    # Register the custom Jinja filters
+    # Register the custom Jinja filters.
     app.template_filter(equal_or_in)
 
     # Register the error handlers.

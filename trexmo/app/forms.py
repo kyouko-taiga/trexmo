@@ -16,47 +16,6 @@ from trexmo.core.utils.yaffel import parse_variables, yaffelize
 bp = Blueprint('forms', __name__)
 
 
-def build_context(variables, form, values):
-    """Build the context of a yaffel expression."""
-
-    # Return the empty string (no context) if there aren't any variable.
-    if not variables:
-        return ''
-
-    rv = ' for '
-
-    # Append the value of each variable to the context.
-    for variable in variables:
-        field = form[variable]
-        value = values[variable] or field.default or field.data_type()
-        rv += variable + '=' + yaffelize(value, field.data_type) + ', '
-
-    # Return the context, without the trailing coma.
-    return rv.rstrip().rstrip(',')
-
-
-def eval_constraints(name, field, values):
-    rv = {}
-
-    for expr in field.constraints:
-        # If the value of the field is None, then we know that it won't
-        # satisfy any of its constraints, since yaffel doesn't have a None
-        # value.
-        if values[name] is not None:
-            try:
-                (expr_type, expr_result) = parser.parse(
-                    expr.replace('self', yaffelize(values[name], field.data_type)))
-                assert expr_type == bool
-            except SyntaxError:
-                expr_result = False
-
-            rv[expr] = expr_result
-        else:
-            rv[expr] = False
-
-    return rv
-
-
 @bp.route('/forms/<name>', methods=['GET'])
 @require_auth
 def get_form_description(auth, name):
@@ -85,7 +44,7 @@ def get_form_description(auth, name):
 @require_auth
 def create_form_state(auth, name):
     """
-    .. http:post:: /forms/(uid)/
+    .. http:get:: /forms/(name)/state
 
         Compute the state of a form, namely the result of its constraints and
         preconditions, given its description and values.
@@ -105,36 +64,9 @@ def create_form_state(auth, name):
     # Initialize all the values with the field defaults.
     values = {name: field.default for name, field in form.fields.items()}
 
-    # Initialize the arrays of constraints and preconditions.
-    constraints = {name: {} for name in form.fields.keys()}
-    preconditions = {}
-
-    for name, field in form.fields.items():
-        # Evaluate the field constraints.
-        constraints[name] = eval_constraints(name, field, values)
-
-        # Evaluate the field (and field options) preconditions.
-        exprs = (option.preconditions for option in field.options)
-        exprs = field.preconditions + [e for el in exprs for e in el]
-
-        for expr in exprs:
-            if expr not in preconditions:
-                # Compute the satisfiability of the precondition.
-                variables = parse_variables(expr)
-                (expr_type, expr_result) = parser.parse(
-                    expr + build_context(variables, form, values))
-                assert expr_type == bool
-
-                # Add the precondition to the array.
-                preconditions[expr] = expr_result
-
-    # Build the form state.
-    state = {
-        'uid': uuid.uuid4().hex,
-        'values': values,
-        'constraints': constraints,
-        'preconditions': preconditions
-    }
+    # Compute the form state.
+    state = _compute_form_state(form, values)
+    state['uid'] = uuid.uuid4().hex
 
     # Send the form state to the client.
     return jsonify(state), 201
@@ -144,7 +76,7 @@ def create_form_state(auth, name):
 @require_auth
 def update_form_state(auth, name):
     """
-    .. http:post:: /forms/(uid)/
+    .. http:patch:: /forms/(name)/state
 
         Compute the update on the state of a form given, its current state.
 
@@ -177,17 +109,25 @@ def update_form_state(auth, name):
     except KeyError:
         return jsonify({'message': 'Form description not found.'}), 404
 
-    # Get the current state and update its values.
+    # Update the form state.
     state = post_data['state']
     state['values'].update(post_data['update'])
+    state.update(_compute_form_state(form, state['values']))
 
-    # Re-evaluate the constraints for the updated fields.
-    for name in post_data['update']:
-        state['constraints'][name] = eval_constraints(name, form[name], state['values'])
+    # Send the form state to the client.
+    return jsonify(state)
 
-    # Re-evaluate the preconditions for all fields (and field options).
+
+def _compute_form_state(form, values):
+    # Initialize the arrays of constraints and preconditions.
+    constraints = {name: {} for name in form.fields.keys()}
     preconditions = {}
+
     for name, field in form.fields.items():
+        # Evaluate the field constraints.
+        constraints[name] = _eval_constraints(name, field, values)
+
+        # Evaluate the field (and field options) preconditions.
         exprs = (option.preconditions for option in field.options)
         exprs = field.preconditions + [e for el in exprs for e in el]
 
@@ -196,12 +136,53 @@ def update_form_state(auth, name):
                 # Compute the satisfiability of the precondition.
                 variables = parse_variables(expr)
                 (expr_type, expr_result) = parser.parse(
-                    expr + build_context(variables, form, state['values']))
+                    expr + _build_context(variables, form, values))
                 assert expr_type == bool
 
                 # Add the precondition to the array.
                 preconditions[expr] = expr_result
-    state['preconditions'] = preconditions
 
-    # Send the form state to the client.
-    return jsonify(state)
+    return {
+        'values': values,
+        'constraints': constraints,
+        'preconditions': preconditions
+    }
+
+
+def _build_context(variables, form, values):
+    # Return the empty string (no context) if there aren't any variable.
+    if not variables:
+        return ''
+
+    rv = ' for '
+
+    # Append the value of each variable to the context.
+    for variable in variables:
+        field = form[variable]
+        value = values[variable] or field.default or field.data_type()
+        rv += variable + '=' + yaffelize(value, field.data_type) + ', '
+
+    # Return the context, without the trailing coma.
+    return rv.rstrip().rstrip(',')
+
+
+def _eval_constraints(name, field, values):
+    rv = {}
+
+    for expr in field.constraints:
+        # If the value of the field is None, then we know that it won't
+        # satisfy any of its constraints, since yaffel doesn't have a None
+        # value.
+        if values[name] is not None:
+            try:
+                (expr_type, expr_result) = parser.parse(
+                    expr.replace('self', yaffelize(values[name], field.data_type)))
+                assert expr_type == bool
+            except SyntaxError:
+                expr_result = False
+
+            rv[expr] = expr_result
+        else:
+            rv[expr] = False
+
+    return rv

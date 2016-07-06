@@ -25,10 +25,9 @@ class InvalidArgumentError(TrexmoError):
         self.message = message
 
 
-class ApiError(TrexmoError):
+class YaffelEvalError(TrexmoError):
+    """Raised when the evaluation of a yaffel expression failed."""
 
-    def __init__(self, message, code=400, payload=None):
-        Exception.__init__(self)
+    def __init__(self, expression=None, message=None):
+        self.expression = expression
         self.message = message
-        self.code = code
-        self.payload = payload
