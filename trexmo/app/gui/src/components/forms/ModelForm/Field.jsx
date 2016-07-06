@@ -12,6 +12,25 @@ export default class Field extends React.Component {
         this.props.onChange(this.props.field.name, e.target.value)
     }
 
+    validationState() {
+        if (!this.props.isTranslated) {
+            return undefined
+        }
+
+        if (typeof this.props.translations === 'undefined') {
+            return 'error'
+        }
+
+        switch (this.props.translations.length) {
+        case 0:
+            return 'error'
+        case 1:
+            return 'success'
+        default:
+            return 'warning'
+        }
+    }
+
     render() {
         const field = this.props.field
         const form_state = this.props.formState
@@ -35,9 +54,20 @@ export default class Field extends React.Component {
                     continue
                 }
 
+                // Generate the option label.
+                let label = it.label
+                if (this.props.isTranslated && (typeof this.props.translations !== 'undefined')) {
+                    for (let translation of this.props.translations) {
+                        if (translation.value == it.value) {
+                            label = `(${translation.type}) ${label}`
+                            break
+                        }
+                    }
+                }
+
                 // Create the option component.
                 options.push(
-                    <option key={it.value} value={it.value}>{it.label}</option>
+                    <option key={it.value} value={it.value}>{label}</option>
                 )
             }
 
@@ -46,7 +76,9 @@ export default class Field extends React.Component {
             if (!value) {
                 value = 'placeholder'
                 options.unshift(
-                    <option key="placeholder" value="placeholder" disabled>Select a value</option>
+                    <option key="placeholder" value="placeholder" disabled>
+                        Select a value
+                    </option>
                 )
             }
 
@@ -84,7 +116,7 @@ export default class Field extends React.Component {
         }
 
         return (
-            <FormGroup controlId={field.name}>
+            <FormGroup controlId={field.name} validationState={this.validationState()}>
                 <ControlLabel>
                     {field.label}{field.required ? ' (*)' : null}
                 </ControlLabel>

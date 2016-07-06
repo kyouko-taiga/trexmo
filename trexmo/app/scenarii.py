@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, jsonify, render_template, request
 
 from yaffel import parser
 
-from trexmo.core.db.models import Model, Scenario
+from trexmo.core.db.models import Model, Scenario, Translation
 from trexmo.core.exc import YaffelEvalError
 from trexmo.core.utils.auth import require_auth
 from trexmo.core.utils.http import jsonify_list
@@ -146,6 +146,8 @@ def save_scenario(auth, uid):
 
         :json name:
             The name of the scenario.
+        :json model:
+            The model of the scenario.
         :json substance:
             The substance under consideration.
         :json cas:
@@ -154,11 +156,6 @@ def save_scenario(auth, uid):
             The description of the scenario.
         :json determinants:
             A dictionary containing the determinants to be updated.
-
-    .. note::
-        Note that the model of exposure of a scenario cannot be modified with
-        this endpoint, as it requires the translation of its determinants. Use
-        :func:`translate_scenario_determinants` instead.    
     """
     post_data = request.get_json(force=True)
 
@@ -176,6 +173,14 @@ def save_scenario(auth, uid):
     scenario.cas = post_data.get('cas', scenario.cas)
     scenario.description = post_data.get('description', scenario.description)
     scenario.determinants = post_data.get('determinants', scenario.determinants)
+
+    # If a new model was provided, load the model description.
+    if 'model' in post_data:
+        try:
+            model = Model.get(current_app.config['MODELS_ROOT_DIR'], post_data['model'])
+        except KeyError:
+            return jsonify({'message': 'Model description not found.'}), 404
+        scenario.model = model
 
     # Save the updated scenario and return ot.
     with open(filename, 'w') as f:
@@ -225,9 +230,9 @@ def run_scenario(auth, uid):
     with open(filename, 'r') as f:
         scenario = Scenario.load(f)
 
-    # We initialize the set of determinants with a value for all the form
-    # fields, so as to make sure the score computation won't complain about
-    # unbound variable for the fields that weren't used.
+    # Initialize the set of determinants with a value for all the form fields,
+    # so as to make sure the score computation won't complain about unbound
+    # variable for the fields that weren't used.
     form = scenario.model.form
     determinants = {
         name: (field.default or field.data_type()) for name, field in form.fields.items()}
@@ -310,6 +315,95 @@ def run_scenario(auth, uid):
     # Return the result of the execution, along with the field values that
     # were used to compute it and the report ID.
     rv.update({'report_id': report_id})
+    return jsonify(rv)
+
+
+@bp.route('/scenarii/<uid>/translate-determinants/<destination>', methods=['GET'])
+@require_auth
+def translate_scenario(auth, uid, destination):
+    """
+    .. http:get:: /scenarii/(uid)/translate-determinants/<destrination>
+
+        Translate the determinants of the a scenario for another model of
+        exposure.
+
+        :param uid:
+            The UID of the scenario for which translate the determinants.
+        :param destination:
+            The name of the destination model.
+    """
+    # Make sure the scenario file exists.
+    filename = os.path.join(current_app.config['SCENARII_ROOT_DIR'], auth, uid)
+    if not os.path.exists(filename):
+        return jsonify({'message': 'Scenario not found.'}), 404
+
+    # Load the scenario.
+    with open(filename, 'r') as f:
+        scenario = Scenario.load(f)
+    src_model = scenario.model
+
+    # Load the destination model description.
+    try:
+        dst_model = Model.get(current_app.config['MODELS_ROOT_DIR'], destination)
+    except KeyError:
+        return jsonify({'message': 'Model description not found.'}), 404
+
+    # Load the appropriate translation model.
+    try:
+        translation = Translation.get(
+            current_app.config['TRANS_ROOT_DIR'], src_model.name, dst_model.name)
+    except KeyError:
+        return jsonify({'message': 'Translation not found.'}), 404
+
+    # Initialize the set of determinants with a value for all the form fields,
+    # so as to make sure the score computation won't complain about unbound
+    # variable for the fields that weren't used.
+    form = src_model.form
+    determinants = {
+        name: (field.default or field.data_type()) for name, field in form.fields.items()}
+
+    # Get the determinants for the model of exposure of the scenario.
+    try:
+        determinants.update(scenario.determinants[src_model.name])
+    except KeyError:
+        return jsonify({'message': 'No determinants for model %s.' % src_model.label}), 400
+
+    # Generate an expression context with all the determinant values.
+    context = [
+        '%(model)s_%(name)s=%(value)s' % {
+            'model': src_model.name,
+            'name': name,
+            'value': yaffelize(value, form[name].data_type)
+        }
+        for name, value in determinants.items()
+    ]
+    suffix = ' for ' + ', '.join(context)
+
+    rv = {}
+
+    # Loop through each source field to translate.
+    for transformation_src, transformation in translation.transformations.items():
+        src_field_name = transformation_src.split('.')[1]
+
+        # Loop through each destination fields.
+        for transformation_dst, translation_options in transformation.fields.items():
+            dst_field_name = transformation_dst.split('.')[1]
+            rv[dst_field_name] = []
+
+            # Look for the appropriate translations.
+            for it in translation_options:
+                # Check if the translation condition is satisfied.
+                if not it['cond']:
+                    satisfied = True
+                else:
+                    condition = _flatten(it['cond']) + suffix
+                    (_, satisfied) = _yaffel(condition)
+
+                # Append the translation to its condition is satisfied.
+                expr = _flatten(it['expr']) + suffix
+                (_, dst_value) = _yaffel(expr)
+                rv[dst_field_name].append({'value': dst_value, 'type': it['type']})
+
     return jsonify(rv)
 
 

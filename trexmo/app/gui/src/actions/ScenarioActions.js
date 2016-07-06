@@ -183,6 +183,34 @@ function runScenario(uid) {
 }
 
 
+function translateDeterminants(scenario, model) {
+    return fetch(`/scenarii/${scenario}/translate-determinants/${model}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Auth-Token': readCookie('Auth-Token')
+        }
+    })
+        .then((response) => {
+            return response.json()
+                .then((json) => {
+                    if (response.status == 200) {
+                        Dispatcher.dispatch({
+                            actionType: 'GET_DETERMINANTS_TRANSLATION',
+                            args: {
+                                scenario: scenario,
+                                model: model
+                            },
+                            data: json
+                        })
+                    } else {
+                        throw new Error(json.message)
+                    }
+                })
+        })
+    
+}
+
+
 export default {
     list: listScenarii,
     get: getScenario,
@@ -190,5 +218,6 @@ export default {
     update: updateScenario,
     save: saveScenario,
     delete: deleteScenario,
-    run: runScenario
+    run: runScenario,
+    translateDeterminants: translateDeterminants
 }

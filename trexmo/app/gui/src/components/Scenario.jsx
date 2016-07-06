@@ -2,9 +2,11 @@ import assign from 'object-assign'
 import moment from 'moment'
 
 import React from 'react'
-import {Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
+import {Row, Col, Alert, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 
 import ScenarioActions from 'trexmo/actions/ScenarioActions'
+
+import TranslationStore from 'trexmo/stores/TranslationStore'
 
 import ScenarioForm from './forms/ScenarioForm'
 import ModelForm from './forms/ModelForm'
@@ -13,6 +15,8 @@ import ModelForm from './forms/ModelForm'
 export default class Scenario extends React.Component {
     constructor(props) {
         super(props)
+
+        this.state = {translating: false}
 
         this.handleDescriptionChange = this.handleDescriptionChange.bind(this)
         this.handleNameChange = this.handleNameChange.bind(this)
@@ -37,10 +41,41 @@ export default class Scenario extends React.Component {
     }
 
     handleModelChange(e) {
-        ScenarioActions.update({
-            uid: this.props.scenario.uid,
-            model: e.target.value
-        })
+        const new_model = e.target.value
+
+        this.setState({translating: true})
+        ScenarioActions.translateDeterminants(this.props.scenario.uid, new_model)
+            .then(() => {
+                this.setState({translating: false})
+
+                // Update the model and determinants of the scenario with the
+                // computed translations.
+                let values = {}
+                const translations = TranslationStore.one(this.props.scenario.uid)
+                for (let field_name in translations) {
+                    // Ignore the internal variables.
+                    if (field_name.startsWith('__') && field_name.endsWith('__')) {
+                        continue
+                    }
+
+                    // Set the field value to the first translation.
+                    if (translations[field_name].length > 0) {
+                        values[field_name] = translations[field_name][0].value
+                    }
+                }
+
+                return ScenarioActions.update({
+                    uid: this.props.scenario.uid,
+                    model: new_model,
+                    determinants: assign(
+                        this.props.scenario.determinants,
+                        {[new_model]: values})
+                })
+            })
+            .catch((error) => {
+                console.error(error)
+                this.setState({translating: false})
+            })
     }
 
     handleSubstanceChange(e) {
@@ -74,6 +109,21 @@ export default class Scenario extends React.Component {
     render() {
         const scenario = this.props.scenario
 
+        let determinants
+        if (this.state.translating) {
+            determinants = (
+                <Alert bsStyle="info">Translating determinants ...</Alert>   
+            )
+        } else {
+            determinants = (
+                <ModelForm
+                    onChange={this.handleDeterminantsChange}
+                    modelName={scenario.model}
+                    scenario={scenario}
+                />
+            )
+        }
+
         return (
             <Row>
                 <Col sm={6}>
@@ -101,10 +151,7 @@ export default class Scenario extends React.Component {
                     />
                 </Col>
                 <Col sm={12}>
-                    <ModelForm
-                        onChange={this.handleDeterminantsChange}
-                        scenario={scenario}
-                    />
+                    {determinants}
                 </Col>
             </Row>
         )

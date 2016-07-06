@@ -2,12 +2,13 @@ import React from 'react'
 import {Alert} from 'react-bootstrap'
 
 import FormActions from 'trexmo/actions/FormActions'
-import FormStore from 'trexmo/stores/FormStore'
-
 import ModelActions from 'trexmo/actions/ModelActions'
-import ModelStore from 'trexmo/stores/ModelStore'
 
 import StoreConnector from 'trexmo/connectors/StoreConnector'
+
+import FormStore from 'trexmo/stores/FormStore'
+import ModelStore from 'trexmo/stores/ModelStore'
+import TranslationStore from 'trexmo/stores/TranslationStore'
 
 import Field from './Field'
 
@@ -36,6 +37,12 @@ class ModelForm extends React.Component {
         const form = this.props.form
         const form_state = this.props.formState
 
+        // Check if the form determinants have been translated.
+        const is_translated = (typeof this.props.translations !== 'undefined')
+        const translations = is_translated
+            ? this.props.translations
+            : {}
+
         // Generate the form fields.
         let fields = []
         for (let field_name of form.fields_order) {
@@ -57,6 +64,8 @@ class ModelForm extends React.Component {
                     onChange={this.handleFieldChange}
                     key={field_name}
                     field={form.fields[field_name]}
+                    isTranslated={is_translated}
+                    translations={translations[field_name]}
                     formState={form_state}
                 />
             )
@@ -98,9 +107,33 @@ const FormLoader = StoreConnector(
         }
 
         componentDidMount() {
-            FormActions.get(this.props.model.form)
+            this._getForm(this.props.formName)
+        }
+
+        componentWillReceiveProps(props) {
+            if (this.props.formName !== props.formName) {
+                this._getForm(props.formName)
+            }
+        }
+
+        render() {
+            if (this.state.loading) {
+                return <Alert bsStyle="info">Loading form data ...</Alert>
+            }
+
+            if (this.state.error !== null) {
+                return <Alert bsStyle="danger">{this.state.error.message}</Alert>
+            }
+
+            const formState = FormStore.formState(this.state.formStateUid)
+            return <ModelForm {...this.props} formState={formState} />
+        }
+
+        _getForm(formName) {
+            this.setState({loading: true})
+            FormActions.get(formName)
                 .then(() => {
-                    return FormActions.createFormState(this.props.model.form)
+                    return FormActions.createFormState(formName)
                         .then((uid) => {
                             // Store the UID of the form state.
                             this.setState({formStateUid: uid})
@@ -112,7 +145,7 @@ const FormLoader = StoreConnector(
                             if (typeof values !== 'undefined') {
                                 const state = FormStore.formState(uid)
                                 return FormActions.updateFormState(
-                                    this.props.model.form, state, values)
+                                    formName, state, values)
                             }
                         })
                 })
@@ -124,23 +157,13 @@ const FormLoader = StoreConnector(
                     this.setState({loading: false})
                 })
         }
-
-        render() {
-            if (this.state.loading) {
-                return <span>Loading form data ...</span>
-            }
-
-            if (this.state.error !== null) {
-                return <Alert bsStyle="danger">{this.state.error.message}</Alert>
-            }
-
-            const formState = FormStore.formState(this.state.formStateUid)
-            return <ModelForm {...this.props} formState={formState} />
-        }
     },
 
-    FormStore,
-    (props) => ({form: FormStore.all()[props.model.form]})
+    [FormStore, TranslationStore],
+    (props) => ({
+        form: FormStore.all()[props.model.form],
+        translations: TranslationStore.all()[props.scenario.uid]
+    })
 )
 
 
@@ -155,7 +178,30 @@ const ModelLoader = StoreConnector(
         }
 
         componentDidMount() {
-            ModelActions.get(this.props.scenario.model)
+            this._getModel(this.props.modelName)
+        }
+
+        componentWillReceiveProps(props) {
+            if (this.props.modelName !== props.modelName) {
+                this._getModel(props.modelName)
+            }
+        }
+
+        render() {
+            if (this.state.loading) {
+                return <Alert bsStyle="info">Loading model data ...</Alert>
+            }
+
+            if (this.state.error !== null) {
+                return <Alert bsStyle="danger">{this.state.error.message}</Alert>
+            }
+
+            return <FormLoader formName={this.props.model.form} {...this.props} />
+        }
+
+        _getModel(name) {
+            this.setState({loading: true})
+            ModelActions.get(name)
                 .catch((error) => {
                     console.error(error)
                     this.setState({error: error})
@@ -164,22 +210,10 @@ const ModelLoader = StoreConnector(
                     this.setState({loading: false})
                 })
         }
-
-        render() {
-            if (this.state.loading) {
-                return <span>Loading model data ...</span>
-            }
-
-            if (this.state.error !== null) {
-                return <Alert bsStyle="danger">{this.state.error.message}</Alert>
-            }
-
-            return <FormLoader {...this.props} />
-        }
     },
 
     ModelStore,
-    (props) => ({model: ModelStore.all()[props.scenario.model]})
+    (props) => ({model: ModelStore.all()[props.modelName]})
 )
 
 
