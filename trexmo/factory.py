@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask.ext.cache import Cache
+from flask_cache import Cache
 
 from sqlalchemy import create_engine
 
