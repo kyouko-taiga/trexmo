@@ -17,6 +17,9 @@
     {% block content %}{% endblock %}
   </div>
 
+  <!-- Fill window.Promise on IE9 -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
+
   <!-- trexmo core scripts -->
   {% if config['DEBUG'] %}
   <script type="text/javascript" src="{{ url_for('static', filename='build/trexmo.js') }}"></script>
