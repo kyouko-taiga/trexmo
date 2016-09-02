@@ -17,7 +17,8 @@
     {% block content %}{% endblock %}
   </div>
 
-  <!-- Fill window.Promise on IE9 -->
+  <!-- Some polyfills for IE9 and other old browsers -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
 
   <!-- trexmo core scripts -->
