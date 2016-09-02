@@ -27,4 +27,4 @@ class Command():
         args = parser.parse_args(self.argv[1:])
         if args.subcommand == 'run':
             app = create_app(debug=args.debug)
-            app.run()
+            app.run(host=args.host, port=args.port)

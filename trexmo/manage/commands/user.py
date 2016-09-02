@@ -44,7 +44,7 @@ class Command():
 
         if args.subcommand == 'list':
             for user in User.query:
-                print('%s (%s)' % (user.username, user.display_name))
+                print('%s (%s)' % (user.username, user.uid))
 
         elif args.subcommand == 'add':
             # Create the new user record.

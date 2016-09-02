@@ -30,7 +30,7 @@ class Form(Dictionarizable):
 
     @classmethod
     def load(cls, file):
-        # Note that we can't decorate this method with flask.ext.cache.memoize
+        # Note that we can't decorate this method with flask_cache.memoize
         # because it will can loaded outside of an application context.
         cache_key = (
             current_app.config['CACHE_KEY_PREFIX'] + cls.__name__ + '.load?' + file.name)
