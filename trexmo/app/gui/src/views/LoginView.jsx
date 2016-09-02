@@ -9,9 +9,19 @@ export default class LoginView extends React.Component {
         return (
             <Grid>
                 <Row>
+                    <Col xs={4} xsOffset={4}>
+                        <img width="100%" src="/static/img/logo-trexmo.png" />
+                    </Col>
                     <Col md={8} mdOffset={2}>
                         <h2 className="form-signin-heading">Please sign in</h2>
                         <LoginForm />
+                        <Row className="trxm-logo-container">
+                            <Col xs={4}><img src="/static/img/logo-ch.jpg" /></Col>
+                            <Col xs={4}><img src="/static/img/logo-unige.jpg" /></Col>
+                            <Col xs={4}><img src="/static/img/logo-unil.png" /></Col>
+                            <Col xs={4}><img src="/static/img/logo-ist.png" /></Col>
+                            <Col xs={4}><img src="/static/img/logo-scaht.png" /></Col>
+                        </Row>
                     </Col>
                 </Row>
             </Grid>

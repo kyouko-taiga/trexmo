@@ -19,3 +19,11 @@
     min-height: 100px;
     resize: vertical;
 }
+
+.trxm-logo-container {
+    margin-top: 40px;
+}
+
+.trxm-logo-container img {
+    width: 100%;
+}
