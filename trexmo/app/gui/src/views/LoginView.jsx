@@ -1,5 +1,5 @@
 import React from 'react'
-import {Grid, Row, Col} from 'react-bootstrap'
+import {Grid, Row, Col, Alert} from 'react-bootstrap'
 
 import LoginForm from 'trexmo/components/LoginForm'
 
@@ -17,7 +17,10 @@ export default class LoginView extends React.Component {
                         <LoginForm />
                         <Row>
                             <Col xs={12}>
-                                Please be aware that you will be using a development version that may include some bugs and performance issues.
+                                <Alert bsStyle="info" className="trxm-disclaimer">
+                                    <b><i className="fa fa-info-circle" /> Disclaimer</b><br />
+                                    <p>Please be aware that you will be using a development version that may include some bugs and performance issues.</p>
+                                </Alert>
                             </Col>
                         </Row>
                         <Row className="trxm-logo-container">

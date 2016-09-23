@@ -58,9 +58,13 @@ export default class Router {
     findRoute() {
         let location
         if (window.location.pathname == '/login') {
-            // Because the login view lives on another page, we should treat it as
-            // a special case.
+            // Because the login view lives on another page, we should treat
+            // it as a special case.
             location = '/login'
+        } else if (window.location.pathname == '/sign-up') {
+            // Because the sign-up view lives on another page, we should treat
+            // it as a special case.
+            location = '/sign-up'
         } else {
             // Read the anchor value.
             location = window.location.hash.substring(1)

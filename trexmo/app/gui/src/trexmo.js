@@ -2,6 +2,7 @@ import React from 'react'
 
 import IndexView from 'trexmo/views/IndexView'
 import LoginView from 'trexmo/views/LoginView'
+import SignUpView from 'trexmo/views/SignUpView'
 import ScenarioView from 'trexmo/views/ScenarioView'
 
 import AppNavbar from 'trexmo/components/AppNavbar'
@@ -13,7 +14,7 @@ import Prompt from 'trexmo/components/dialogs/Prompt'
 import Router from './Router'
 
 
-// Define a view wrapper that includes the navigation menu as well as the 
+// Define a view wrapper that includes the navigation menu as well as the
 // dialog and alert components.
 const LoggedWrapper = (View) => class extends React.Component {
     render() {
@@ -33,6 +34,7 @@ const LoggedWrapper = (View) => class extends React.Component {
 // Define the application routes.
 const routes = {
     '/login': LoginView,
+    '/sign-up': SignUpView,
     '/': LoggedWrapper(IndexView),
     '/scenarii/<uid>': LoggedWrapper(ScenarioView)
 }

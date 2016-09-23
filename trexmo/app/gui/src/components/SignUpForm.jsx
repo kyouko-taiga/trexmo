@@ -11,17 +11,19 @@ export default class LoginForm extends React.Component {
         this.state = {
             username: '',
             password: '',
+            confirm: '',
             error: null
         }
 
         this.submit = this.submit.bind(this)
         this.handleUsernameChange = this.handleUsernameChange.bind(this)
         this.handlePasswordChange = this.handlePasswordChange.bind(this)
+        this.handleConfirmChange = this.handleConfirmChange.bind(this)
     }
 
     submit(e) {
         e.preventDefault()
-        fetch('/auth/tokens/', {
+        fetch('/auth/users/', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -30,27 +32,20 @@ export default class LoginForm extends React.Component {
             body: JSON.stringify({
                 username: this.state.username,
                 password: this.state.password,
+                confirm: this.state.confirm
             })
         })
         .then((resp) => {
             switch (resp.status) {
             case 201:
-            case 403:
+                window.location = '/login'
+                break;
+
+            case 400:
                 resp.json()
                 .then((json) => {
-                    if (resp.status == 201) {
-                        // Store the token.
-                        let date = new Date()
-                        date.setTime(json.expires_at * 1000)
-                        document.cookie =
-                            `Auth-Token=${json.token}; expires=${date.toUTCString()};`
-
-                        // Navigate to the index.
-                        window.location = '/'
-                    } else {
-                        // Handle a failed authentication.
-                        this.setState({error: json.message})
-                    }
+                    // Handle a failed request.
+                    this.setState({error: json.message})
                 })
                 .catch((err) => {
                     console.error(err)
@@ -77,13 +72,17 @@ export default class LoginForm extends React.Component {
         this.setState({password: e.target.value})
     }
 
+    handleConfirmChange(e) {
+        this.setState({confirm: e.target.value})
+    }
+
     render() {
         let error_message = null
         if (this.state.error) {
             error_message = (
                 <div className="form-group">
                     <div className="alert alert-danger">
-                        <strong>Authentication failed</strong>
+                        <strong>Request failed</strong>
                         <br />
                         {this.state.error}
                     </div>
@@ -94,11 +93,11 @@ export default class LoginForm extends React.Component {
         return (
             <form onSubmit={this.submit}>
                 <FormGroup controlId="username">
-                    <ControlLabel className="sr-only">Username or email</ControlLabel>
+                    <ControlLabel className="sr-only">Email address</ControlLabel>
                     <FormControl
                         onChange={this.handleUsernameChange}
-                        type="text"
-                        placeholder="Username or email"
+                        type="email"
+                        placeholder="Email address"
                         value={this.state.username}
                         required autofocus
                     />
@@ -113,13 +112,20 @@ export default class LoginForm extends React.Component {
                         required
                     />
                 </FormGroup>
+                <FormGroup controlId="confirm">
+                    <ControlLabel className="sr-only">Password confirmation</ControlLabel>
+                    <FormControl
+                        onChange={this.handleConfirmChange}
+                        type="password"
+                        placeholder="Password confirmation"
+                        value={this.state.confirm}
+                        required
+                    />
+                </FormGroup>
                 {error_message}
                 <FormGroup>
-                    <Button type="submit" className="btn btn-primary btn-block">Sign in</Button>
+                    <Button type="submit" className="btn btn-success btn-block">Sign up</Button>
                 </FormGroup>
-                <div className="text-right">
-                    <Button component="a" href="/sign-up" bsStyle="success">sign up</Button>
-                </div>
             </form>
         )
     }
