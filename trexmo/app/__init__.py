@@ -1,4 +1,4 @@
-from flask import jsonify, redirect, request, url_for
+from flask import jsonify, request, render_template
 
 from trexmo import factory
 from trexmo.core.exc import AuthenticationError
@@ -19,7 +19,8 @@ def create_app(debug=False):
     @app.errorhandler(AuthenticationError)
     def handle_auth_error(error):
         if not request.is_xhr:
-            return redirect(url_for('login.login')), 403
+            print(0)
+            return render_template('not-logged-in.html')
         else:
             return jsonify({'error': 'forbidden'}), 403
 
