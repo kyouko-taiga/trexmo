@@ -26,7 +26,7 @@ def handle_yaffel_error(e):
             'expr': e.expression,
             'error': e.message
         }
-    }), 400    
+    }), 400
 
 
 @bp.route('/scenarii/', methods=['GET'])
@@ -131,7 +131,7 @@ def get_scenario(auth, uid):
         scenario = Scenario.load(f)
 
     return jsonify(scenario.to_dict()), 200
-    
+
 
 @bp.route('/scenarii/<uid>', methods=['POST'])
 @require_auth
@@ -400,9 +400,10 @@ def translate_scenario(auth, uid, destination):
                     (_, satisfied) = _yaffel(condition)
 
                 # Append the translation to its condition is satisfied.
-                expr = _flatten(it['expr']) + suffix
-                (_, dst_value) = _yaffel(expr)
-                rv[dst_field_name].append({'value': dst_value, 'type': it['type']})
+                if satisfied:
+                    expr = _flatten(it['expr']) + suffix
+                    (_, dst_value) = _yaffel(expr)
+                    rv[dst_field_name].append({'value': dst_value, 'type': it['type']})
 
     return jsonify(rv)
 
