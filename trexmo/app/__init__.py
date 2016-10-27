@@ -1,7 +1,7 @@
 from flask import jsonify, request, render_template
 
 from trexmo import factory
-from trexmo.core.exc import AuthenticationError
+from trexmo.core.exc import InvalidTokenError
 from trexmo.core.utils.encoders import TrexmoJsonEncoder
 
 
@@ -16,10 +16,9 @@ def create_app(debug=False):
     app.template_filter(equal_or_in)
 
     # Register the error handlers.
-    @app.errorhandler(AuthenticationError)
+    @app.errorhandler(InvalidTokenError)
     def handle_auth_error(error):
         if not request.is_xhr:
-            print(0)
             return render_template('not-logged-in.html')
         else:
             return jsonify({'error': 'forbidden'}), 403

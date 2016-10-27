@@ -4,7 +4,8 @@ from flask import current_app, request
 
 from itsdangerous import BadSignature, SignatureExpired, TimestampSigner
 
-from trexmo.core.exc import ExpiredTokenError, InvalidTokenError
+from trexmo.core.db.models import User
+from trexmo.core.exc import ExpiredTokenError, InvalidTokenError, PrivilegeError
 
 
 def parse_auth():
@@ -54,6 +55,30 @@ def require_auth(f):
     def wrapper(*args, **kwargs):
         # Get and validate the auth token.
         auth = parse_auth()
+
+        # Append the owner UID to the function arguments and call it.
+        kwargs['auth'] = auth
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
+def require_root_auth(f):
+    """A decorator that is used on views to ensure that a valid authentication
+    token was attached to the request, and that it is associated with a root
+    user.
+
+    .. seealso:: func:`require_auth`
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        # Get and validate the auth token.
+        auth = parse_auth()
+
+        # Make sure the associated user is a root.
+        user = User.query.filter(User.uid == auth).first()
+        if (user is None) or (not user.root):
+            raise PrivilegeError()
 
         # Append the owner UID to the function arguments and call it.
         kwargs['auth'] = auth

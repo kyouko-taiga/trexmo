@@ -35,16 +35,19 @@ class Command():
         sub.add_argument(
             '-p', '--password', dest='password', action='store',
             help='The password of the user (will be asked if not provided).')
+        sub.add_argument(
+            '-r', '--root', dest='root', action='store_true',
+            help='A flag that indicates if the user is a root.')
 
         sub = subparsers.add_parser('delete', help='Delete a user.')
-        sub.add_argument('username', action='store', help="The username of the user.")        
+        sub.add_argument('username', action='store', help="The username of the user.")
 
         # Parse and execute the command line.
         args = parser.parse_args(self.argv[1:])
 
         if args.subcommand == 'list':
             for user in User.query:
-                print('%s (%s)' % (user.username, user.uid))
+                print('%s: %s%s' % (user.uid, user.username, ' (root)' if user.root else ''))
 
         elif args.subcommand == 'add':
             # Create the new user record.
@@ -58,6 +61,9 @@ class Command():
                 if getpass('confirm: ') != password:
                     raise InvalidArgumentError('Password do not match.')
             new_user.password = pbkdf2_sha256.encrypt(password)
+
+            # Set the user as a root if needed.
+            new_user.root = args.root
 
             # Add the user the the database.
             db_session.add(new_user)

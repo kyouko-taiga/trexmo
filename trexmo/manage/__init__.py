@@ -72,11 +72,11 @@ class Manage(object):
             return 0
 
         # Execute the subcommand
-        try:
-            getattr(self, self.argv[1])()
-        except AttributeError as e:
+        if not hasattr(self, self.argv[1]):
             print("unkown command '%s'" % subcommand)
             return -1
+
+        getattr(self, self.argv[1])()
 
     def __getattr__(self, command_name):
         return load_command(__name__, command_name)(self.argv[1:])

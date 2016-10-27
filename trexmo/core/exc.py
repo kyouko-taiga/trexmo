@@ -18,6 +18,10 @@ class ExpiredTokenError(InvalidTokenError):
     """Raised when an authentication token expired."""
 
 
+class PrivilegeError(AuthenticationError):
+    """Raised when the desired action requires more privileges."""
+
+
 class InvalidArgumentError(TrexmoError):
     """Raised when a function or method is called with invalid arguments."""
 

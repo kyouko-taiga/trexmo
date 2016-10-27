@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Integer, String, Table
+from sqlalchemy import Column, Boolean, Integer, String, Table
 
 from .base import Base
 
@@ -16,6 +16,7 @@ class User(Base, Dictionarizable):
     uid = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
+    root = Column(Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return '<User %r>' % (self.username)
