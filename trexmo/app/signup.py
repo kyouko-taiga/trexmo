@@ -64,4 +64,4 @@ def create_user():
 
 @bp.route('/sign-up')
 def login():
-    return render_template('sign-up.html')
+    return render_template('app.html')

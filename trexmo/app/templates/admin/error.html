@@ -1,0 +1,17 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <h1>An error occured</h1>
+      <div class="alert alert-danger" role="alert">
+        {{ message }}
+      </div>
+    </div>
+    <div class="col-md-12">
+      Click <a href="{{ url_for('admin.index') }}">here</a> to get back to the admin dashboard.
+    </div>
+  </div>
+</div>
+{% endblock content %}

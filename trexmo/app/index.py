@@ -14,4 +14,4 @@ bp = Blueprint('index', __name__)
 @bp.route('/')
 @require_auth
 def index(auth):
-    return render_template('index.html')
+    return render_template('app.html')
