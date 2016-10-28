@@ -73,7 +73,7 @@ class Manage(object):
 
         # Execute the subcommand
         if not hasattr(self, self.argv[1]):
-            print("unkown command '%s'" % subcommand)
+            print("unknown command '%s'" % subcommand)
             return -1
 
         getattr(self, self.argv[1])()
