@@ -8,10 +8,11 @@ from trexmo.core.utils.loaders import ordered_loader
 
 from . import Form
 
+from ..cached import Cached
 from ..dictionarization import Dictionarizable
 
 
-class Model(Dictionarizable):
+class Model(Cached, Dictionarizable):
 
     _dictionarizable_attrs = ('name', 'label', 'version', 'unit', 'form', 'scores')
 
@@ -28,11 +29,7 @@ class Model(Dictionarizable):
 
     @classmethod
     def load(cls, file):
-        # Note that we can't decorate this method with flask_cache.memoize
-        # because it will can loaded outside of an application context.
-        cache_key = (
-            current_app.config['CACHE_KEY_PREFIX'] + cls.__name__ + '.load?' + file.name)
-        rv = current_app.cache.get(cache_key)
+        rv = cls.load_from_cache(file)
         if rv is not None:
             return rv
 
@@ -63,7 +60,7 @@ class Model(Dictionarizable):
         rv.version = data.get('version', None)
         rv.unit = data.get('unit', '')
 
-        current_app.cache.set(cache_key, rv)
+        cls.save_to_cache(file, rv)
         return rv
 
     @classmethod

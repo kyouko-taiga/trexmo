@@ -1,9 +1,8 @@
 import os
 
-from flask import current_app
-
 from trexmo.core.utils.loaders import ordered_loader
 
+from ..cached import Cached
 from ..dictionarization import Dictionarizable
 
 
@@ -21,11 +20,7 @@ class Translation(Dictionarizable):
 
     @classmethod
     def load(cls, file):
-        # Note that we can't decorate this method with flask_cache.memoize
-        # because it will can loaded outside of an application context.
-        cache_key = (
-            current_app.config['CACHE_KEY_PREFIX'] + cls.__name__ + '.load?' + file.name)
-        rv = current_app.cache.get(cache_key)
+        rv = cls.load_from_cache(file)
         if rv is not None:
             return rv
 
@@ -50,7 +45,7 @@ class Translation(Dictionarizable):
         # Parse the optional data.
         rv.version = data.get('version', None)
 
-        current_app.cache.set(cache_key, rv)
+        cls.save_to_cache(file, rv)
         return rv
 
     @classmethod
