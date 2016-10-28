@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div id="trxm-content">
+  {% block content %}{% endblock %}
+</div>
+
+<!-- Some polyfills for IE9 and other old browsers -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
+
+<!-- trexmo core scripts -->
+{% if config['DEBUG'] %}
+<script type="text/javascript" src="{{ url_for('static', filename='build/trexmo.js') }}"></script>
+{% else %}
+<script type="text/javascript" src="{{ url_for('static', filename='build/trexmo.min.js') }}"></script>
+{% endif %}
+
+<!-- page specific scripts -->
+{% block script %}{% endblock script %}
+{% endblock body %}

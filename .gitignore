@@ -95,5 +95,10 @@ data/forms/
 data/models/
 data/translations/
 
-# Scenarii
+# Databases
+*.db
 data/scenarii/
+
+# Browserify
+trexmo/app/gui/node_modules/
+trexmo/app/static/build/

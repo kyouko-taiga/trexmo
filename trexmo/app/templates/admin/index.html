@@ -1,0 +1,106 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="col-md-12">
+      {% for message in messages %}
+      <div class="alert alert-success" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- Shows the users panel. -->
+    <div class="col-md-6">
+      <h3>Users</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Username</th>
+            <th>Root</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.uid }}</td>
+            <td>{{ user.username }}</td>
+            <td>{% if user.root %}<i class="fa fa-check"></i>{% endif %}</td>
+              <td>
+                <a class="btn btn-xs btn-danger" href="{{ url_for('admin.remove_user', uid=user.uid) }}">
+                  <i class="fa fa-times"></i>
+                </a>
+                <a class="btn btn-xs btn-warning" href="{{ url_for('admin.reset_password', uid=user.uid) }}">
+                  <i class="fa fa-key"></i>
+                </a>
+              </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shows the DDTL files panel. -->
+    <div class="col-md-6">
+      <h3>DDTL Files</h3>
+      <form action="{{ url_for('admin.add_ddtl') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="ddtl_file">Add a DDTL source file</label>
+          <input type="file" id="ddtl_source" name="source">
+        </div>
+        <div class="form-group">
+          <label>Source type</label><br />
+          <label class="radio-inline">
+            <input type="radio" name="category" id="ddlt_model" value="model" checked="true">
+            Model
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="category" id="ddlt_form" value="form">
+            Form
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="category" id="ddlt_translation" value="translation">
+            Translation
+          </label>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">Add</button>
+        </div>
+      </form>
+
+      <hr />
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Type</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {% for category in ddtl %}
+          {% for filename in ddtl[category] %}
+          <tr>
+            <td>{{ filename }}</td>
+            <td>{{ category }}</td>
+            <td>
+              <a class="btn btn-xs btn-danger" href="{{ url_for('admin.remove_ddtl', category=category, filename=filename) }}">
+                <i class="fa fa-times"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="EI=edge">
+  <meta name="viewport" constent="width=device-width, initial-scale=1">
+  <title>TREXMO</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }}">
+
+  <!-- trexmo core stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/trexmo.css') }}" />
+</head>
+<body style="padding-top: 60px;">
+  {% block body %}{% endblock body %}
+</body>
+</html>

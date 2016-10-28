@@ -1,0 +1,33 @@
+.trxm-notification-alert {
+    position: fixed;
+    top: 60px;
+    left: 15px;
+    width: 50%;
+    transition: opacity .25s ease-in-out;
+    z-index: 999;
+}
+
+.trxm-notification-alert.trxm-visible {
+    opacity: 1;
+}
+
+.trxm-notification-alert.trxm-hidden {
+    opacity: 0;
+}
+
+.trxm-scenario-description {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.trxm-logo-container {
+    margin-top: 40px;
+}
+
+.trxm-logo-container img {
+    width: 100%;
+}
+
+.trxm-disclaimer {
+    margin-top: 20px
+}

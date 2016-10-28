@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <a href="{{ url_for('admin.index') }}" class="navbar-brand">TREXMO Admin</a>
+    </div>
+    <ul class="nav navbar-nav navbar-right">
+      <li role="presentation"><a href="/">Return to TREXMO</a></li>
+    </ul>
+  </div>
+</nav>
+{% block content %}{% endblock content %}
+{% endblock body %}

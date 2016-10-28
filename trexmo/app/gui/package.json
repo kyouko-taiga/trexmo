@@ -1,0 +1,42 @@
+{
+    "name": "trexmo-gui",
+    "version": "1.0.0",
+    "description": "The GUI of TREXMO.",
+    "author": "Dimitri Racordon",
+    "private": true,
+    "devDependencies": {
+        "babel-preset-es2015": "latest",
+        "babel-preset-stage-2": "latest",
+        "babel-preset-react": "latest",
+        "babelify": "latest",
+        "browserify": "latest",
+        "uglify-js": "latest",
+        "watchify": "latest"
+    },
+    "dependencies": {
+        "bluebird": "latest",
+        "flux": "latest",
+        "jquery": "latest",
+        "moment": "latest",
+        "normalizr": "latest",
+        "object-assign": "latest",
+        "react": "latest",
+        "react-bootstrap": "~0.29.5",
+        "react-dom": "latest",
+        "whatwg-fetch": "latest"
+    },
+    "babel": {
+        "presets": ["es2015", "stage-2", "react"]
+    },
+    "browserify": {
+        "transform": [
+            "babelify"
+        ]
+    },
+    "scripts": {
+        "clean": "rm -f ../static/build/*.js",
+        "build-debug": "browserify src/trexmo.js --extension=.jsx -o ../static/build/trexmo.js -v -d",
+        "build": "browserify src/trexmo.js  --extension=.jsx | uglifyjs -cm > ../static/build/trexmo.min.js",
+        "watch": "watchify src/trexmo.js --extension=.jsx -o ../static/build/trexmo.js -v -d"
+    }
+}

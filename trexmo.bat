@@ -29,4 +29,4 @@ xcopy trexmo "%UserProfile%\trexmo" \E
 
 :run
 cd "%UserProfile%\trexmo"
-python manage.py run
+python manage.py server run
