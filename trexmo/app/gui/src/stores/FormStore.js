@@ -56,6 +56,13 @@ class FormStore extends BaseStore {
         this.emitChange()
     }
 
+    UPDATE_FIELD_VALUE(action) {
+        if (this._states.hasOwnProperty(action.formState)) {
+            this._states[action.formState].values[action.field] = action.value
+            this.emitChange()
+        }
+    }
+
     _insertOrUpdate(data) {
         if (this._forms.hasOwnProperty(data.name)) {
             this._forms[data.name] = assign(this._forms[data.name], data)

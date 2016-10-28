@@ -18,16 +18,39 @@ class ModelForm extends React.Component {
         super()
 
         this.handleFieldChange = this.handleFieldChange.bind(this)
+        this.stateUpdateDelays = {}
     }
 
     handleFieldChange(field, value) {
         const update = {[field]: value}
 
-        // Update the form state.
-        FormActions.updateFormState(this.props.model.name, this.props.formState, update)
-            .catch((error) => {
-                console.error(error)
-            })
+        let synchronizeState = () => {
+            FormActions.updateFormState(this.props.model.name, this.props.formState, update)
+                .catch((error) => {
+                    console.error(error)
+                })
+        }
+
+        if (this.props.form.fields[field].options.length == 0) {
+            // If the field isn't a text input, we put a delay on the form
+            // state synchronization, so as to prevent the UI from falling
+            // behind the user input.
+            if (this.stateUpdateDelays[field]) {
+                clearTimeout(this.stateUpdateDelays[field])
+            }
+            this.stateUpdateDelays[field] = setTimeout(synchronizeState, 1000)
+
+            // Manually dispatch the field change, so that the UI updates
+            // optimistically.
+            FormActions.updateFieldValue(this.props.formState.uid, field, value)
+                .catch((error) => {
+                    console.error(error)
+                })
+        } else {
+            // If the field is a select input, we synchronize the form state
+            // right away.
+            synchronizeState()
+        }
 
         // Notify the form change to the parent component.
         this.props.onChange(update)

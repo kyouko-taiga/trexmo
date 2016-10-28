@@ -1,5 +1,7 @@
 import 'whatwg-fetch'
 
+import Bluebird from 'bluebird'
+
 import {normalize} from 'normalizr'
 
 import Dispatcher from 'trexmo/Dispatcher'
@@ -86,8 +88,21 @@ function updateFormState(name, state, update) {
 }
 
 
+function updateFieldValue(formState, field, value) {
+    return new Bluebird((resolve, reject) => {
+        Dispatcher.dispatch({
+            actionType: 'UPDATE_FIELD_VALUE',
+            formState: formState,
+            field: field,
+            value: value
+        })
+    })
+}
+
+
 export default {
     get: getForm,
     createFormState: createFormState,
-    updateFormState: updateFormState
+    updateFormState: updateFormState,
+    updateFieldValue: updateFieldValue
 }
