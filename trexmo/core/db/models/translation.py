@@ -6,7 +6,7 @@ from ..cached import Cached
 from ..dictionarization import Dictionarizable
 
 
-class Translation(Dictionarizable):
+class Translation(Cached, Dictionarizable):
 
     _dictionarizable_attrs = ('source', 'destination', 'transformations')
 
