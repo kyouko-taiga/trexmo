@@ -99,16 +99,9 @@ class ModelForm extends React.Component {
                 <h4>Determinants for {form.label}</h4>
                 <p className="text-muted">
                     {
-                        'Please select the determinants by rows rather ' +
-                        'than columns, and be sure enter a value for each ' +
-                        'and every field by scrolling down the list.'
-                    }
-                    <br />
-                    {
-                        'If you perform a model translation, it may be ' +
-                        'possible for a field to contain multiple ' +
-                        'recomended values. Be sure to select the most ' +
-                        'appropriate one for each and every field.'
+                        'Recommendation: to assess a new exposure situation, rather create a ' +
+                        'new exposure situation on the home page instead of modifying the ' +
+                        'existing list of exposure parameters.'
                     }
                 </p>
                 {fields}

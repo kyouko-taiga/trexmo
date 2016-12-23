@@ -66,7 +66,7 @@ export default class ScenarioToolbar extends React.Component {
         this.setState({running: true})
 
         const uid = this.props.scenario.uid
-        const url_prefix = 
+        const url_prefix =
             `${location.protocol}//${location.hostname}` +
             `${location.port ? ':' + location.port : ''}`
 
@@ -114,7 +114,7 @@ export default class ScenarioToolbar extends React.Component {
                     <i className="fa fa-fw fa-floppy-o" />Save
                 </Button>
                 <Button onClick={this.handleCopy} bsStyle="warning">
-                    <i className="fa fa-fw fa-files-o" />Copy
+                    <i className="fa fa-fw fa-files-o" />Save as
                 </Button>
                 <Button onClick={this.handleDelete} bsStyle="danger">
                     <i className="fa fa-fw fa-trash" />Delete
